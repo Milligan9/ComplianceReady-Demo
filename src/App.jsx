@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { supabase, getLibrary, getEmployees, getAllInServiceSessions } from "./supabase.js";
+import { supabase } from "./supabase.js";
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
@@ -39,8 +39,18 @@ function DisabledBanner({items}) {
       <span style={{fontSize:16,marginTop:2}}>🔒</span>
       <div>
         <div style={{fontWeight:700,fontSize:13,color:"#60a5fa",marginBottom:4}}>Disabled in Demo Mode</div>
-        <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>{items.join(" · ")}</div>
+        <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.8}}>
+          {items.map((item,i)=><span key={i}>• {item}&nbsp;&nbsp;</span>)}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function DisabledButton({label,icon}) {
+  return (
+    <div title="Disabled in demo mode" style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 12px",background:"#1e293b",border:"1px solid #334155",borderRadius:8,fontSize:12,color:"#475569",cursor:"not-allowed",userSelect:"none"}}>
+      <span style={{fontSize:11}}>🔒</span>{icon} {label}
     </div>
   );
 }
@@ -68,11 +78,6 @@ function getYearStart(hireDate){
 }
 function getYearEnd(hireDate){
   try{const s=getYearStart(hireDate);const e=new Date(s.getFullYear()+1,s.getMonth(),s.getDate());e.setDate(e.getDate()-1);return e;}catch{return new Date();}
-}
-function getCurrentYearLabel(hireDate){
-  const s=getYearStart(hireDate);const e=getYearEnd(hireDate);
-  const fmt=d=>d.toLocaleDateString("en-US",{month:"short",year:"numeric"});
-  return`${fmt(s)} – ${fmt(e)}`;
 }
 function isYear1(hireDate){
   try{return(new Date()-new Date(hireDate))/(1000*60*60*24*365.25)<1;}catch{return false;}
@@ -131,9 +136,6 @@ function sortLibrary(library){
   const order=(tr)=>{const tags=tr.tags||[];if(tags.includes("Required for Clearance"))return 0;if(tags.includes("Pre-Service"))return 1;if(tags.includes("Annual"))return 2;if(tags.includes("Acknowledgement"))return 3;return 4;};
   return [...library].sort((a,b)=>order(a)-order(b));
 }
-function nextAnniv(hire){
-  try{const h=new Date(hire),t=new Date();let d=new Date(t.getFullYear(),h.getMonth(),h.getDate());if(d<t)d=new Date(t.getFullYear()+1,h.getMonth(),h.getDate());return d.toISOString().split("T")[0];}catch{return"";}
-}
 
 const S={
   page:{minHeight:"100vh",background:"#0f172a",color:"#f1f5f9",fontFamily:"system-ui,sans-serif"},
@@ -180,7 +182,6 @@ function EmpPortal({employees,library,goHome}){
   const [nameQ,setNameQ]=useState("");const [pinQ,setPinQ]=useState("");
   const [empId,setEmpId]=useState(null);const [err,setErr]=useState("");
   const [tab,setTab]=useState("trainings");const [trSearch,setTrSearch]=useState("");
-  const [showBoard,setShowBoard]=useState(false);
   const {toast,Toasts}=useToast();
   const emp=employees.find(e=>e.id===empId);
 
@@ -208,7 +209,7 @@ function EmpPortal({employees,library,goHome}){
   const assignedTrainings=assignedIds.map(id=>{
     const libTr=sortedLib.find(t=>t.id===id)||{id,name:id,ctype:"Read and Acknowledge",link:"",quiz:[],tags:[],default_hours:0,category:"Training",renewal_cycle:"12 Months"};
     const empTr=emp?.trainings?.[id]||{};
-    return{...libTr,...empTr,id,name:libTr.name,ctype:libTr.ctype,quiz:Array.isArray(libTr.quiz)?libTr.quiz:[],link:libTr.link||"",tags:Array.isArray(libTr.tags)?libTr.tags:[],default_hours:libTr.default_hours||0,category:libTr.category||"Training",renewal_cycle:libTr.renewal_cycle||"12 Months",completed:empTr.completed||null,dueDate:empTr.dueDate||"",initials:empTr.initials||null,certificate:empTr.certificate||null,hours_override:empTr.hours_override??null,completionId:empTr.completionId||null};
+    return{...libTr,...empTr,id,name:libTr.name,ctype:libTr.ctype,quiz:Array.isArray(libTr.quiz)?libTr.quiz:[],link:libTr.link||"",tags:Array.isArray(libTr.tags)?libTr.tags:[],default_hours:libTr.default_hours||0,category:libTr.category||"Training",renewal_cycle:libTr.renewal_cycle||"12 Months",completed:empTr.completed||null,dueDate:empTr.dueDate||"",initials:empTr.initials||null,certificate:empTr.certificate||null,hours_override:empTr.hours_override??null};
   });
 
   const groups=[
@@ -227,87 +228,191 @@ function EmpPortal({employees,library,goHome}){
   const completedHrs=calcCompletedHours(emp,library);const reqHrs=requiredHours(emp);
   const {cleared,missing,lockedSince}=getClearanceStatus(emp,library);
   const badges=calcBadges(emp);
+  const certCount=assignedTrainings.filter(t=>t?.certificate).length;
 
   function TrainingCard({t}){
     if(!t)return null;
     const isAck=t?.tags?.includes("Acknowledgement");
     const st=getStatus(t?.completed,t?.dueDate,emp?.hire,t?.renewal_cycle,isAck);
-    const hrs=effectiveHours(t,t)||0;const isComplete=st==="complete";
+    const hrs=effectiveHours(t,t)||0;
+    const isComplete=st==="complete";
+    const hasCert=!!t?.certificate;
+
     return<div style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:8}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:6,marginBottom:4}}>
         <span style={{fontWeight:600,fontSize:13,flex:1}}>{t.name}</span>
-        <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}><CTag type={t.ctype}/><Tag status={st}/></div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
+          {hasCert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 Cert ✓</span>}
+          <CTag type={t.ctype}/><Tag status={st}/>
+        </div>
       </div>
-      {hrs>0&&!isAck&&<div style={{marginBottom:4}}><span style={{fontSize:11,fontWeight:700,color:isComplete?"#4ade80":"#64748b",background:isComplete?"#16a34a18":"#33415518",padding:"1px 8px",borderRadius:99}}>⏱ {hrs}h{!isComplete&&<span style={{color:"#475569",fontWeight:400}}> (pending)</span>}</span></div>}
-      <div style={{fontSize:11,color:"#64748b",marginBottom:4,display:"flex",gap:12,flexWrap:"wrap"}}>
+
+      {hrs>0&&!isAck&&<div style={{marginBottom:4}}>
+        <span style={{fontSize:11,fontWeight:700,color:isComplete?"#4ade80":"#64748b",background:isComplete?"#16a34a18":"#33415518",padding:"1px 8px",borderRadius:99}}>
+          ⏱ {hrs}h{!isComplete&&<span style={{color:"#475569",fontWeight:400}}> (pending)</span>}
+        </span>
+      </div>}
+
+      <div style={{fontSize:11,color:"#64748b",marginBottom:6,display:"flex",gap:12,flexWrap:"wrap"}}>
         {t.dueDate&&<span>Due: <span style={{color:ST_COLOR[st]}}>{t.dueDate}</span></span>}
         {t.completed&&<span>✓ <span style={{color:"#4ade80"}}>{t.completed}</span></span>}
         {t.initials&&<span>Initials: <span style={{color:"#60a5fa",fontFamily:"Georgia,serif",fontWeight:700}}>{t.initials}</span></span>}
       </div>
-      {st!=="complete"&&<div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:4}}>
-        {(t.ctype==="Read and Acknowledge"||t.ctype==="Read and Quiz"||t.ctype==="Certificate")&&
-          <div style={{background:"#1e3a5f",border:"1px solid #3b82f644",borderRadius:6,padding:"5px 12px",fontSize:12,color:"#60a5fa"}}>
-            🔒 Sign & complete disabled in demo
-          </div>}
-        {t.ctype==="Link"&&t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#16a34a"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>}
-      </div>}
+
+      {/* Show completion actions — all disabled in demo */}
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:4}}>
+        {t.ctype==="Read and Acknowledge"&&(
+          isComplete
+            ?<span style={{fontSize:11,color:"#4ade80"}}>✍️ Signed & Acknowledged</span>
+            :<DisabledButton icon="✍️" label="Read & Sign to Acknowledge"/>
+        )}
+        {t.ctype==="Read and Quiz"&&<>
+          {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>📄 Open Material ↗</a>}
+          {isComplete
+            ?<span style={{fontSize:11,color:"#4ade80"}}>📝 Quiz Passed</span>
+            :<DisabledButton icon="📝" label="Take Quiz"/>}
+        </>}
+        {t.ctype==="Link"&&<>
+          {t.link
+            ?<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#16a34a"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>
+            :<DisabledButton icon="🔗" label="Link coming soon"/>}
+          {!isComplete&&<DisabledButton icon="✓" label="Mark Complete (Leadership only)"/>}
+        </>}
+        {t.ctype==="Certificate"&&<>
+          {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>}
+          {isComplete&&hasCert
+            ?<span style={{fontSize:11,color:"#4ade80"}}>🏆 Certificate uploaded</span>
+            :<DisabledButton icon="🏆" label="Upload Certificate"/>}
+        </>}
+      </div>
     </div>;
   }
 
   return(
     <div style={S.page}><DemoBanner/><Toasts/>
-      <NavBar title={emp.name} sub={emp.pos} onHome={()=>{setEmpId(null);setTab("trainings");goHome();}} extra={<button style={S.btn("#334155")} onClick={()=>{setEmpId(null);setTab("trainings");}}>Sign Out</button>}/>
+      <NavBar
+        title={emp.name}
+        sub={`${emp.pos} · ${emp.type}`}
+        onHome={()=>{setEmpId(null);setTab("trainings");goHome();}}
+        extra={<button style={S.btn("#334155")} onClick={()=>{setEmpId(null);setTab("trainings");}}>Sign Out</button>}
+      />
       <div style={{padding:16,maxWidth:780,margin:"0 auto"}}>
 
-        <DisabledBanner items={["Signing & acknowledging documents","Taking quizzes","Uploading certificates","Saving completions"]}/>
+        {/* Employee Info Card */}
+        <div style={{...S.card,marginBottom:12,display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
+          <div><div style={S.lbl}>Start Date</div><div style={{fontWeight:600,fontSize:13}}>{emp.hire}</div></div>
+          {emp.email&&<div><div style={S.lbl}>Email</div><div style={{fontSize:13,color:"#94a3b8"}}>{emp.email}</div></div>}
+          {emp.phone&&<div><div style={S.lbl}>Phone</div><div style={{fontSize:13,color:"#94a3b8"}}>{emp.phone}</div></div>}
+          <div style={{flex:1,minWidth:180}}><div style={S.lbl}>Training Progress</div><Bar val={done} total={assignedTrainings.length} h={10}/></div>
+        </div>
 
+        <DisabledBanner items={[
+          "Signing & acknowledging documents",
+          "Taking quizzes",
+          "Uploading & downloading certificates",
+          "Marking Link trainings complete",
+          "Saving any completions",
+          "Changing passcode",
+          "Viewing leaderboard scores",
+          "Earning badges (display only)",
+        ]}/>
+
+        {/* Clearance Banner */}
         <div style={{background:cleared?"#16a34a18":"#dc262618",border:`1px solid ${cleared?"#16a34a44":"#dc262644"}`,borderRadius:10,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:24}}>{cleared?"✅":"⛔"}</span><div><div style={{fontWeight:700,fontSize:14,color:cleared?"#4ade80":"#f87171"}}>{cleared?"CLEARED — Eligible to work independently":"NOT CLEARED — Missing required training"}</div>{!cleared&&<div style={{fontSize:12,color:"#94a3b8",marginTop:2}}>Missing: {missing.map(t=>t.name).join(", ")}</div>}{cleared&&lockedSince&&<div style={{fontSize:11,color:"#94a3b8",marginTop:1}}>Cleared since {lockedSince}</div>}</div></div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:24}}>{cleared?"✅":"⛔"}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:14,color:cleared?"#4ade80":"#f87171"}}>{cleared?"CLEARED — Eligible to work independently":"NOT CLEARED — Missing required training"}</div>
+              {!cleared&&<div style={{fontSize:12,color:"#94a3b8",marginTop:2}}>Missing: {missing.map(t=>t.name).join(", ")}</div>}
+              {cleared&&lockedSince&&<div style={{fontSize:11,color:"#94a3b8",marginTop:1}}>Cleared since {lockedSince}</div>}
+            </div>
+          </div>
           <ClearanceBadge cleared={cleared} lockedSince={lockedSince}/>
         </div>
 
+        {/* Stats */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
-          {[{l:"Done",v:`${done}/${assignedTrainings.length}`,c:done===assignedTrainings.length?"#4ade80":"#60a5fa"},{l:"Hours Earned",v:`${completedHrs}h`,c:completedHrs>=reqHrs?"#4ade80":"#fbbf24"},{l:"Required",v:`${reqHrs}h`,c:"#94a3b8"},{l:"Badges",v:badges.map(b=>BADGES.find(x=>x.id===b)?.icon||"").join("")||"—",c:"#a78bfa"}].map(s=>(
-            <div key={s.l} style={{...S.card,textAlign:"center",padding:10}}><div style={{fontSize:s.l==="Badges"?16:18,fontWeight:700,color:s.c}}>{s.v}</div><div style={{fontSize:10,color:"#64748b",marginTop:2}}>{s.l}</div></div>
+          {[
+            {l:"Done",v:`${done}/${assignedTrainings.length}`,c:done===assignedTrainings.length?"#4ade80":"#60a5fa"},
+            {l:"Hours Earned",v:`${completedHrs}h`,c:completedHrs>=reqHrs?"#4ade80":"#fbbf24"},
+            {l:"Required",v:`${reqHrs}h`,c:"#94a3b8"},
+            {l:"Badges",v:badges.map(b=>BADGES.find(x=>x.id===b)?.icon||"").join("")||"—",c:"#a78bfa"},
+          ].map(s=>(
+            <div key={s.l} style={{...S.card,textAlign:"center",padding:10}}>
+              <div style={{fontSize:s.l==="Badges"?16:18,fontWeight:700,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:10,color:"#64748b",marginTop:2}}>{s.l}</div>
+            </div>
           ))}
         </div>
 
+        {/* Hours Bar */}
         <div style={{...S.card,marginBottom:12}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><div style={S.lbl}>Annual Training Hours</div><span style={{fontSize:11,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1 (80h req)":"Year 2+ (40h req)"}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <div style={S.lbl}>Annual Training Hours</div>
+            <span style={{fontSize:11,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1 (80h req)":"Year 2+ (40h req)"}</span>
+          </div>
           <HoursBar completed={completedHrs} required={reqHrs}/>
           {completedHrs<reqHrs&&<div style={{fontSize:11,color:"#fbbf24",marginTop:4}}>{(reqHrs-completedHrs).toFixed(1)} hours still needed this year</div>}
           {completedHrs>=reqHrs&&<div style={{fontSize:11,color:"#4ade80",marginTop:4}}>✓ Annual hour requirement met!</div>}
         </div>
 
-        {badges.length>0&&<div style={{...S.card,marginBottom:12}}><div style={{...S.lbl,marginBottom:8}}>🎖️ Your Badges</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{badges.map(bid=>{const b=BADGES.find(x=>x.id===bid);return b?<div key={bid} style={{background:"#0f172a",border:"1px solid #334155",borderRadius:8,padding:"8px 10px",textAlign:"center",minWidth:76}}><div style={{fontSize:20}}>{b.icon}</div><div style={{fontSize:10,fontWeight:700,marginTop:2}}>{b.label}</div></div>:null;})}</div></div>}
+        {/* Badges */}
+        {badges.length>0&&<div style={{...S.card,marginBottom:12}}>
+          <div style={{...S.lbl,marginBottom:8}}>🎖️ Your Badges</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {badges.map(bid=>{const b=BADGES.find(x=>x.id===bid);return b?<div key={bid} style={{background:"#0f172a",border:"1px solid #334155",borderRadius:8,padding:"8px 10px",textAlign:"center",minWidth:76}}><div style={{fontSize:20}}>{b.icon}</div><div style={{fontSize:10,fontWeight:700,marginTop:2}}>{b.label}</div></div>:null;})}
+          </div>
+        </div>}
 
+        {/* Tabs */}
         <div style={{display:"flex",gap:8,marginBottom:12}}>
           <button style={S.btn(tab==="trainings"?"#3b82f6":"#334155",true)} onClick={()=>setTab("trainings")}>📋 My Trainings</button>
-          <button style={S.btn(tab==="certs"?"#3b82f6":"#334155",true)} onClick={()=>setTab("certs")}>🏆 Certificates</button>
+          <button style={{...S.btn(tab==="certs"?"#3b82f6":"#334155",true),position:"relative"}} onClick={()=>setTab("certs")}>
+            🏆 Certificates{certCount>0&&<span style={{background:"#4ade80",color:"#0f172a",borderRadius:99,fontSize:10,fontWeight:800,padding:"1px 6px",marginLeft:6}}>{certCount}</span>}
+          </button>
         </div>
 
         {tab==="trainings"&&<div>
-          <div style={{position:"relative",marginBottom:12}}><input style={{...S.inp,paddingLeft:32,fontSize:13}} placeholder="Search trainings…" value={trSearch} onChange={e=>setTrSearch(e.target.value)}/><span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"#64748b",fontSize:13}}>🔍</span>{trSearch&&<button style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}} onClick={()=>setTrSearch("")}>✕</button>}</div>
+          <div style={{position:"relative",marginBottom:12}}>
+            <input style={{...S.inp,paddingLeft:32,fontSize:13}} placeholder="Search trainings…" value={trSearch} onChange={e=>setTrSearch(e.target.value)}/>
+            <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"#64748b",fontSize:13}}>🔍</span>
+            {trSearch&&<button style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:14}} onClick={()=>setTrSearch("")}>✕</button>}
+          </div>
           {groups.map(g=>{
-            const grp=grouped[g.key]||[];const allInGroup=assignedTrainings.filter(t=>getGroupKey(t)===g.key);
+            const grp=grouped[g.key]||[];
+            const allInGroup=assignedTrainings.filter(t=>getGroupKey(t)===g.key);
             const grpDone=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="complete").length;
             const grpHrs=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="complete").reduce((a,t)=>a+effectiveHours(t,t),0);
             const grpOverdue=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="overdue").length;
             const grpSoon=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="soon").length;
-            return<CollapsibleSection key={g.key} label={g.label} color={g.color} bg={g.bg} done={grpDone} total={grp.length} hours={grpHrs} overdue={grpOverdue} dueSoon={grpSoon} isEmpty={allInGroup.length===0}>{grp.map(t=><TrainingCard key={t.id} t={t}/>)}</CollapsibleSection>;
+            return<CollapsibleSection key={g.key} label={g.label} color={g.color} bg={g.bg} done={grpDone} total={grp.length} hours={grpHrs} overdue={grpOverdue} dueSoon={grpSoon} isEmpty={allInGroup.length===0}>
+              {grp.map(t=><TrainingCard key={t.id} t={t}/>)}
+            </CollapsibleSection>;
           })}
         </div>}
 
         {tab==="certs"&&<div style={S.card}>
-          <div style={{...S.lbl,marginBottom:8}}>🏆 Certificate Vault</div>
-          <DisabledBanner items={["Uploading certificates","Replacing existing certificates","Downloading certificates"]}/>
-          <p style={{fontSize:12,color:"#64748b",margin:"0 0 12px"}}>In the full version, employees upload completion certificates (PDF, JPG, PNG) which are stored securely and visible to leadership.</p>
-          {assignedTrainings.map(t=>(
-            <div key={t.id} style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:"1px solid #334155",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-              <div style={{flex:1}}><div style={{fontWeight:600,fontSize:13}}>{t.name}</div><div style={{fontSize:11,color:"#475569",marginTop:2}}>No certificate uploaded</div></div>
-              <div style={{background:"#1e3a5f",border:"1px solid #3b82f644",borderRadius:6,padding:"4px 10px",fontSize:11,color:"#60a5fa"}}>🔒 Upload disabled in demo</div>
-            </div>
-          ))}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+            <div style={S.lbl}>Certificate Vault</div>
+            {certCount>0&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"2px 10px",borderRadius:99,fontSize:12,fontWeight:700}}>🏆 {certCount} on file</span>}
+          </div>
+          <DisabledBanner items={["Uploading new certificates","Replacing existing certificates","Downloading certificates"]}/>
+          <p style={{fontSize:12,color:"#64748b",margin:"0 0 12px",lineHeight:1.6}}>In the full version, employees upload completion certificates (PDF, JPG, PNG — max 5MB) which are stored securely and visible to leadership for compliance audits.</p>
+          {assignedTrainings.map(t=>{
+            const cert=t.certificate;
+            return<div key={t.id} style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${cert?"#16a34a44":"#334155"}`,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontWeight:600,fontSize:13}}>{t.name}</span>
+                  {cert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 6px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 ✓</span>}
+                </div>
+                {cert
+                  ?<div style={{fontSize:11,color:"#4ade80",marginTop:2}}>✓ {cert.name} · {cert.date}</div>
+                  :<div style={{fontSize:11,color:"#475569",marginTop:2}}>No certificate uploaded</div>}
+              </div>
+              <DisabledButton icon={cert?"🔄":"⬆"} label={cert?"Replace":"Upload"}/>
+            </div>;
+          })}
         </div>}
       </div>
     </div>
@@ -332,25 +437,30 @@ function AdminPortalDemo({employees,library,goHome}){
       const aIds=Object.keys(e.trainings||{});
       const done=aIds.filter(id=>getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate)==="complete").length;
       const overdue=aIds.filter(id=>getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate)==="overdue").length;
-      return`<tr><td>${e.name}</td><td>${e.pos}</td><td>${e.type}</td><td>${e.hire}</td><td style="color:${cleared?"green":"red"};font-weight:bold">${cleared?"✅ CLEARED":"⛔ NOT CLEARED"}</td><td style="color:${hrs>=req?"green":"red"};font-weight:bold">${hrs}/${req}h</td><td>${done}/${aIds.length}</td><td style="color:${overdue>0?"red":"green"}">${overdue}</td></tr>`;
+      return`<tr><td>${e.name}</td><td>${e.pos}</td><td>${e.type}</td><td>${e.hire}</td><td style="color:${cleared?"green":"red"};font-weight:bold">${cleared?"✅ CLEARED":"⛔ NOT CLEARED"}</td><td style="color:${hrs>=req?"green":"red"};font-weight:bold">${hrs}/${req}h</td><td>${done}/${aIds.length}</td><td style="color:${overdue>0?"red":"green"};font-weight:bold">${overdue}</td></tr>`;
     }).join("");
     const clearedCt=employees.filter(e=>getClearanceStatus(e,library).cleared).length;
-    const html=`<!DOCTYPE html><html><head><title>ComplianceReady — Group Report</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}table{width:100%;border-collapse:collapse;margin-top:12px;}th{background:#1e293b;color:white;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;}tr:nth-child(even){background:#f8fafc;}.sum{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}.st{background:#f8fafc;padding:10px 16px;border-radius:8px;text-align:center;border:1px solid #e2e8f0;}.sn{font-size:20px;font-weight:bold;}.sl{font-size:10px;color:#64748b;}</style></head><body>
-    <h1>ComplianceReady — Staff Compliance Report</h1>
-    <p style="font-size:11px;color:#64748b;">Generated: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})} · DEMO DATA ONLY</p>
+    const totalHrs=employees.reduce((a,e)=>a+calcCompletedHours(e,library),0);
+    const html=`<!DOCTYPE html><html><head><title>ComplianceReady — Group Compliance Report</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}h1{font-size:18px;margin:0 0 4px;}table{width:100%;border-collapse:collapse;margin-top:12px;}th{background:#1e293b;color:white;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;}tr:nth-child(even){background:#f8fafc;}.sum{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}.st{background:#f8fafc;padding:10px 16px;border-radius:8px;text-align:center;border:1px solid #e2e8f0;min-width:80px;}.sn{font-size:20px;font-weight:bold;}.sl{font-size:10px;color:#64748b;}@media print{@page{margin:0.5in;}}</style>
+    </head><body>
+    <h1>ComplianceReady — Group Compliance Report</h1>
+    <p style="font-size:11px;color:#64748b;margin:0 0 14px;">Generated: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})} · DEMO DATA ONLY</p>
     <div class="sum">
       <div class="st"><div class="sn">${employees.length}</div><div class="sl">Total Staff</div></div>
       <div class="st"><div class="sn" style="color:${clearedCt===employees.length?"green":"red"}">${clearedCt}/${employees.length}</div><div class="sl">Cleared</div></div>
       <div class="st"><div class="sn" style="color:red">${employees.filter(e=>Object.values(e.trainings||{}).some(v=>getStatus(v?.completed,v?.dueDate)==="overdue")).length}</div><div class="sl">Staff w/ Overdue</div></div>
-      <div class="st"><div class="sn">${employees.reduce((a,e)=>a+calcCompletedHours(e,library),0).toFixed(1)}h</div><div class="sl">Total Hours</div></div>
+      <div class="st"><div class="sn">${totalHrs.toFixed(1)}h</div><div class="sl">Total Hours</div></div>
     </div>
-    <table><thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Hire Date</th><th>Clearance</th><th>Hours</th><th>Trainings</th><th>Overdue</th></tr></thead><tbody>${rows}</tbody></table>
+    <table><thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Hire Date</th><th>Clearance</th><th>Hours</th><th>Trainings Done</th><th>Overdue</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <p style="font-size:10px;color:#999;margin-top:20px;">This report was generated from ComplianceReady demo data. Contact us to set up your facility.</p>
     </body></html>`;
     const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
   }
 
   function printEmpReport(emp){
-    const {cleared,lockedSince}=getClearanceStatus(emp,library);
+    const {cleared,lockedSince,missing}=getClearanceStatus(emp,library);
     const hrs=calcCompletedHours(emp,library);const req=requiredHours(emp);
     const assignedIds=Object.keys(emp.trainings||{});
     const rows=assignedIds.map(id=>{
@@ -358,14 +468,27 @@ function AdminPortalDemo({employees,library,goHome}){
       const v=emp.trainings[id]||{};
       const st=getStatus(v.completed,v.dueDate,emp.hire,libTr.renewal_cycle,libTr.tags?.includes("Acknowledgement"));
       const statusColor=st==="complete"?"green":st==="overdue"?"red":"orange";
-      return`<tr><td>${libTr.name}</td><td>${libTr.ctype}</td><td>${v.dueDate||""}</td><td>${v.completed||""}</td><td>${v.initials||""}</td><td style="color:${statusColor};font-weight:bold">${ST_LBL[st]||st}</td></tr>`;
+      const hrs2=effectiveHours(libTr,v);
+      return`<tr><td>${libTr.name}</td><td>${libTr.ctype||""}</td><td style="text-align:right">${hrs2>0?hrs2+"h":"—"}</td><td>${v.dueDate||""}</td><td>${v.completed||""}</td><td>${v.initials||""}</td><td style="color:${statusColor};font-weight:bold">${ST_LBL[st]||st}</td></tr>`;
     }).join("");
-    const html=`<!DOCTYPE html><html><head><title>Compliance Report — ${emp.name}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}table{width:100%;border-collapse:collapse;margin-top:12px;}th{background:#1e293b;color:white;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;}tr:nth-child(even){background:#f8fafc;}.badge{padding:3px 10px;border-radius:16px;font-weight:bold;font-size:12px;}.cleared{background:#dcfce7;color:#16a34a;}.notcleared{background:#fee2e2;color:#dc2626;}</style></head><body>
+    const html=`<!DOCTYPE html><html><head><title>Compliance Report — ${emp.name}</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}h1{font-size:18px;margin:0 0 4px;}h2{font-size:13px;color:#334155;margin:0 0 14px;font-weight:normal;}table{width:100%;border-collapse:collapse;margin-top:12px;}th{background:#1e293b;color:white;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;}tr:nth-child(even){background:#f8fafc;}.badge{padding:3px 10px;border-radius:16px;font-weight:bold;font-size:12px;}.cleared{background:#dcfce7;color:#16a34a;}.notcleared{background:#fee2e2;color:#dc2626;}.sum{display:flex;gap:12px;margin:12px 0;flex-wrap:wrap;}.st{background:#f8fafc;padding:10px 14px;border-radius:8px;text-align:center;border:1px solid #e2e8f0;}.sn{font-size:20px;font-weight:bold;}.sl{font-size:10px;color:#64748b;}.sig{display:flex;gap:36px;margin-top:36px;}.sig-line{flex:1;border-top:1px solid #334155;padding-top:4px;font-size:9px;color:#64748b;}@media print{@page{margin:0.5in;}}</style>
+    </head><body>
     <h1>ComplianceReady — Individual Compliance Report</h1>
     <h2>${emp.name} · ${emp.pos} · ${emp.type}</h2>
-    <p style="font-size:11px;color:#64748b;">Generated: ${new Date().toLocaleDateString()} · DEMO DATA ONLY · Hire Date: ${emp.hire}</p>
-    <p><span class="badge ${cleared?"cleared":"notcleared"}">${cleared?`✅ CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}</span> &nbsp; Hours: <strong style="color:${hrs>=req?"green":"red"}">${hrs}/${req}h</strong></p>
-    <table><thead><tr><th>Training</th><th>Type</th><th>Due Date</th><th>Completed</th><th>Initials</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+    <p style="font-size:11px;color:#64748b;margin:0 0 8px;">Generated: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})} · DEMO DATA ONLY · Hire Date: ${emp.hire}</p>
+    ${emp.email?`<p style="font-size:11px;color:#64748b;margin:0 0 12px;">Email: ${emp.email} · Phone: ${emp.phone||"—"}</p>`:""}
+    <p><span class="badge ${cleared?"cleared":"notcleared"}">${cleared?`✅ CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}</span></p>
+    ${!cleared?`<p style="font-size:11px;color:#dc2626;">Missing for clearance: ${missing.map(t=>t.name).join(", ")}</p>`:""}
+    <div class="sum">
+      <div class="st"><div class="sn" style="color:${hrs>=req?"green":"red"}">${hrs}/${req}h</div><div class="sl">Annual Hours</div></div>
+      <div class="st"><div class="sn">${assignedIds.filter(id=>getStatus(emp.trainings[id]?.completed,emp.trainings[id]?.dueDate)==="complete").length}/${assignedIds.length}</div><div class="sl">Trainings Done</div></div>
+      <div class="st"><div class="sn" style="color:red">${assignedIds.filter(id=>getStatus(emp.trainings[id]?.completed,emp.trainings[id]?.dueDate)==="overdue").length}</div><div class="sl">Overdue</div></div>
+    </div>
+    <table><thead><tr><th style="width:30%">Training</th><th style="width:14%">Type</th><th style="width:6%;text-align:right">Hours</th><th style="width:10%">Due Date</th><th style="width:10%">Completed</th><th style="width:7%">Initials</th><th style="width:10%">Status</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="sig"><div class="sig-line">Employee Signature &amp; Date</div><div class="sig-line">Supervisor Signature &amp; Date</div><div class="sig-line">Title &amp; Date</div></div>
+    <p style="font-size:10px;color:#999;margin-top:16px;">Generated from ComplianceReady demo data.</p>
     </body></html>`;
     const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
   }
@@ -377,17 +500,34 @@ function AdminPortalDemo({employees,library,goHome}){
 
   return(
     <div style={S.page}><DemoBanner/><Toasts/>
-      <NavBar title="ComplianceReady — Leadership Dashboard" sub="Demo Mode" onHome={goHome}
-        extra={<button style={S.btn("#1e3a5f")} onClick={printGroupReport}>📊 Print Group Report</button>}/>
+      <NavBar
+        title="ComplianceReady — Leadership Dashboard"
+        sub="Demo Mode — read-only view"
+        onHome={goHome}
+        extra={<button style={S.btn("#1e3a5f")} onClick={printGroupReport}>📊 Print Group Report</button>}
+      />
       <div style={{padding:16,maxWidth:1100,margin:"0 auto"}}>
 
-        <DisabledBanner items={["Adding or editing employees","Resetting trainings","Marking trainings complete","AI compliance assistant","Managing training library","Bulk hours entry"]}/>
+        <DisabledBanner items={[
+          "Adding or editing employees",
+          "Resetting or clearing trainings",
+          "Marking trainings complete",
+          "Granting or revoking clearance",
+          "Adding prior year / bulk hours",
+          "Managing training library",
+          "AI compliance assistant",
+          "In-service session logging",
+          "Uploading or downloading certificates",
+          "Exporting full compliance reports (individual reports available below)",
+        ]}/>
 
         {notClearedEmps.length>0&&<div style={{background:"#dc262618",border:"1px solid #dc262644",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:18}}>⛔</span><div><div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div><div style={{fontSize:12,color:"#94a3b8"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div></div>
+          <span style={{fontSize:18}}>⛔</span>
+          <div><div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div><div style={{fontSize:12,color:"#94a3b8"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div></div>
         </div>}
         {overdueEmps.length>0&&<div style={{background:"#ca8a0418",border:"1px solid #ca8a0444",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:18}}>🚨</span><div><div style={{fontWeight:700,color:"#fbbf24",fontSize:14}}>{overdueEmps.length} staff with overdue trainings</div><div style={{fontSize:12,color:"#94a3b8"}}>{overdueEmps.map(e=>e.name).join(", ")}</div></div>
+          <span style={{fontSize:18}}>🚨</span>
+          <div><div style={{fontWeight:700,color:"#fbbf24",fontSize:14}}>{overdueEmps.length} staff with overdue trainings</div><div style={{fontSize:12,color:"#94a3b8"}}>{overdueEmps.map(e=>e.name).join(", ")}</div></div>
         </div>}
 
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,marginBottom:14}}>
@@ -398,11 +538,14 @@ function AdminPortalDemo({employees,library,goHome}){
             {l:"Trainings Done",v:`${totalDone}/${totalAll}`,c:"#a78bfa"},
             {l:"Total Hours",v:`${employees.reduce((a,e)=>a+calcCompletedHours(e,library),0).toFixed(1)}h`,c:"#34d399"},
           ].map(s=>(
-            <div key={s.l} style={{...S.card,textAlign:"center",padding:12}}><div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:10,color:"#64748b",marginTop:2}}>{s.l}</div></div>
+            <div key={s.l} style={{...S.card,textAlign:"center",padding:12}}>
+              <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
+              <div style={{fontSize:10,color:"#64748b",marginTop:2}}>{s.l}</div>
+            </div>
           ))}
         </div>
 
-        <div style={{...S.lbl,marginBottom:8}}>Staff — click any card to view individual report</div>
+        <div style={{...S.lbl,marginBottom:8}}>Staff — click any card to view details & print individual report</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10}}>
           {employees.map(emp=>{
             const {done,total,hrs,req,cleared}=stats(emp);
@@ -410,7 +553,13 @@ function AdminPortalDemo({employees,library,goHome}){
             const bc=!cleared?"#ef4444":hasOver?"#f87171":hrs<req?"#fbbf24":done===total&&total>0?"#4ade80":"#334155";
             return<div key={emp.id} style={{...S.card,cursor:"pointer",borderColor:bc,padding:13}} onClick={()=>setSelId(emp.id)}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                <div><div style={{fontWeight:700,fontSize:13}}>{emp.name}</div><div style={{fontSize:11,color:"#60a5fa",marginTop:1}}>{emp.pos}</div><div style={{fontSize:10,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1":"Year 2+"}</div></div>
+                <div>
+                  <div style={{fontWeight:700,fontSize:13}}>{emp.name}</div>
+                  <div style={{fontSize:11,color:"#60a5fa",marginTop:1}}>{emp.pos}</div>
+                  <div style={{fontSize:10,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1":"Year 2+"}</div>
+                  {emp.email&&<div style={{fontSize:10,color:"#64748b",marginTop:2}}>✉ {emp.email}</div>}
+                  {emp.phone&&<div style={{fontSize:10,color:"#64748b"}}>📞 {emp.phone}</div>}
+                </div>
                 <ClearanceBadge cleared={cleared}/>
               </div>
               <div style={{marginBottom:4}}><div style={{fontSize:10,color:"#64748b",marginBottom:2}}>Training Progress</div><Bar val={done} total={total}/></div>
@@ -425,26 +574,30 @@ function AdminPortalDemo({employees,library,goHome}){
           const {cleared,lockedSince,missing}=getClearanceStatus(emp,library);
           const hrs=calcCompletedHours(emp,library);const req=requiredHours(emp);
           const assignedIds=Object.keys(emp.trainings||{});
-          return<Modal title={`📋 ${emp.name} — Training Summary`} onClose={()=>setSelId(null)} wide>
-            <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+          return<Modal title={`📋 ${emp.name} — Training Detail`} onClose={()=>setSelId(null)} wide>
+            <div style={{display:"flex",gap:10,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
               <ClearanceBadge cleared={cleared} lockedSince={lockedSince}/>
-              <span style={{fontSize:13,color:hrs>=req?"#4ade80":"#fbbf24",fontWeight:700}}>{hrs}/{req}h Annual</span>
-              <button style={{...S.btn("#1e3a5f"),marginLeft:"auto",fontSize:12}} onClick={()=>printEmpReport(emp)}>📊 Print Individual Report</button>
+              <span style={{fontSize:13,color:hrs>=req?"#4ade80":"#fbbf24",fontWeight:700}}>{hrs}/{req}h Annual Hours</span>
+              <button style={{...S.btn("#1e3a5f"),marginLeft:"auto",fontSize:12,padding:"5px 14px"}} onClick={()=>printEmpReport(emp)}>📊 Print Individual Report</button>
             </div>
-            {!cleared&&<div style={{fontSize:12,color:"#f87171",marginBottom:10}}>Missing for clearance: {missing.map(t=>t.name).join(", ")}</div>}
-            <DisabledBanner items={["Editing completions","Resetting trainings","Granting clearance manually"]}/>
+            {emp.email&&<div style={{fontSize:12,color:"#64748b",marginBottom:4}}>✉ {emp.email} {emp.phone&&`· 📞 ${emp.phone}`}</div>}
+            {!cleared&&<div style={{fontSize:12,color:"#f87171",marginBottom:8,background:"#dc262618",padding:"8px 10px",borderRadius:6}}>⛔ Missing for clearance: {missing.map(t=>t.name).join(", ")}</div>}
+            <DisabledBanner items={["Editing completions","Resetting trainings","Granting or revoking clearance","Adding hours"]}/>
             <div style={{maxHeight:400,overflowY:"auto"}}>
               {assignedIds.map(id=>{
                 const libTr=library.find(t=>t.id===id)||{name:id,ctype:"",tags:[],renewal_cycle:"12 Months",default_hours:0};
                 const v=emp.trainings[id]||{};
                 const st=getStatus(v.completed,v.dueDate,emp.hire,libTr.renewal_cycle,libTr.tags?.includes("Acknowledgement"));
+                const tHrs=effectiveHours(libTr,v);
                 return<div key={id} style={{padding:"8px 10px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:6,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:600,fontSize:12}}>{libTr.name}</div>
                     <div style={{fontSize:11,color:"#64748b",display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+                      <CTag type={libTr.ctype}/>
+                      {tHrs>0&&<span style={{color:st==="complete"?"#4ade80":"#64748b"}}>⏱ {tHrs}h</span>}
                       {v.completed&&<span>✓ {v.completed}</span>}
                       {v.dueDate&&!v.completed&&<span>Due: {v.dueDate}</span>}
-                      {v.initials&&<span>Initials: {v.initials}</span>}
+                      {v.initials&&<span>Initials: <span style={{fontFamily:"Georgia,serif",fontWeight:700,color:"#60a5fa"}}>{v.initials}</span></span>}
                     </div>
                   </div>
                   <Tag status={st}/>
@@ -460,9 +613,12 @@ function AdminPortalDemo({employees,library,goHome}){
 
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App(){
-  const [employees,setEmployees]=useState([]);const [library,setLibrary]=useState([]);
-  const [loading,setLoading]=useState(true);const [screen,setScreen]=useState("home");
-  const [code,setCode]=useState("");const [codeErr,setCodeErr]=useState("");
+  const [employees,setEmployees]=useState([]);
+  const [library,setLibrary]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [screen,setScreen]=useState("home");
+  const [code,setCode]=useState("");
+  const [codeErr,setCodeErr]=useState("");
 
   async function loadAll(){
     try{
@@ -470,7 +626,16 @@ export default function App(){
         supabase.from('training_library').select('*').order('sort_order'),
         supabase.from('employees').select('*').order('name'),
       ]);
-      const lib=(libData.data||[]).map(t=>({id:t.id,name:t.name,ctype:t.ctype,link:t.link||'',docContent:t.doc_content||'',docName:t.doc_name||'',quiz:Array.isArray(t.quiz)?t.quiz:[],category:t.category||'Training',tags:Array.isArray(t.tags)?t.tags:[],renewal_cycle:t.renewal_cycle||'12 Months',default_hours:t.default_hours||0,provider:t.provider||''}));
+      const lib=(libData.data||[]).map(t=>({
+        id:t.id,name:t.name,ctype:t.ctype,link:t.link||'',
+        docContent:t.doc_content||'',docName:t.doc_name||'',
+        quiz:Array.isArray(t.quiz)?t.quiz:[],
+        category:t.category||'Training',
+        tags:Array.isArray(t.tags)?t.tags:[],
+        renewal_cycle:t.renewal_cycle||'12 Months',
+        default_hours:t.default_hours||0,
+        provider:t.provider||'',
+      }));
       const emps=await Promise.all((empData.data||[]).map(async e=>{
         const eid=e.id;
         const [assignRes,compRes,bulkRes]=await Promise.all([
@@ -480,28 +645,60 @@ export default function App(){
         ]);
         const trainings={};
         (assignRes.data||[]).forEach(a=>{
-          const trCompletions=(compRes.data||[]).filter(c=>c.training_id===a.training_id).sort((x,y)=>(y.completed||'').localeCompare(x.completed||''));
+          const trCompletions=(compRes.data||[])
+            .filter(c=>c.training_id===a.training_id)
+            .sort((x,y)=>(y.completed||'').localeCompare(x.completed||''));
           const current=trCompletions[0]||null;
-          trainings[a.training_id]={completed:current?.completed||null,dueDate:current?.due_date||a.due_date||'',initials:current?.initials||null,hours_override:current?.hours_override??null,completionId:current?.id||null,certificate:null};
+          trainings[a.training_id]={
+            completed:current?.completed||null,
+            dueDate:current?.due_date||a.due_date||'',
+            initials:current?.initials||null,
+            hours_override:current?.hours_override??null,
+            completionId:current?.id||null,
+            certificate:null,
+          };
         });
-        return{id:e.id,name:e.name,pos:e.pos,type:e.type,hire:e.hire,email:e.email,phone:e.phone,pin:e.pin,cleared_at:e.cleared_at||null,trainings,bulkHours:bulkRes.data||[]};
+        return{
+          id:e.id,name:e.name,pos:e.pos,type:e.type,
+          hire:e.hire,email:e.email,phone:e.phone,pin:e.pin,
+          cleared_at:e.cleared_at||null,
+          trainings,
+          bulkHours:bulkRes.data||[],
+        };
       }));
       setLibrary(lib);setEmployees(emps);
-    }catch(e){console.error("Load error:",e);}finally{setLoading(false);}
+    }catch(e){console.error("Load error:",e);}
+    finally{setLoading(false);}
   }
 
   useEffect(()=>{loadAll();},[]);
   function goHome(){setScreen("home");setCode("");setCodeErr("");}
   function tryAdmin(){code===ADMIN_CODE?(setScreen("admin"),setCodeErr("")):setCodeErr("Incorrect code. Please try again.");}
 
-  if(loading)return<div style={{...S.page,display:"flex",flexDirection:"column"}}><DemoBanner/><div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🎓</div><div style={{fontSize:16,color:"#64748b"}}>Loading ComplianceReady Demo…</div></div></div></div>;
+  if(loading)return(
+    <div style={{...S.page,display:"flex",flexDirection:"column"}}>
+      <DemoBanner/>
+      <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:16}}>🎓</div>
+          <div style={{fontSize:16,color:"#64748b"}}>Loading ComplianceReady Demo…</div>
+        </div>
+      </div>
+    </div>
+  );
+
   if(screen==="employee")return<ErrorBoundary><EmpPortal employees={employees} library={library} goHome={goHome}/></ErrorBoundary>;
   if(screen==="admin")return<ErrorBoundary><AdminPortalDemo employees={employees} library={library} goHome={goHome}/></ErrorBoundary>;
+
   if(screen==="admin-login")return(
     <div style={S.page}><DemoBanner/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 60px)"}}>
         <div style={{width:"100%",maxWidth:360}}>
-          <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>🛡️</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>Leadership Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the admin code to continue</p></div>
+          <div style={{textAlign:"center",marginBottom:24}}>
+            <div style={{fontSize:44,marginBottom:8}}>🛡️</div>
+            <h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>Leadership Access</h1>
+            <p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the admin code to continue</p>
+          </div>
           <div style={S.card}>
             <label style={S.lbl}>Admin Code</label>
             <input style={{...S.inp,marginBottom:10}} type="password" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryAdmin()} placeholder="Enter code"/>
@@ -513,6 +710,7 @@ export default function App(){
       </div>
     </div>
   );
+
   return(
     <div style={S.page}><DemoBanner/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 60px)"}}>
@@ -521,8 +719,14 @@ export default function App(){
           <h1 style={{margin:"0 0 6px",fontSize:24,fontWeight:800}}>ComplianceReady</h1>
           <p style={{margin:"0 0 28px",color:"#64748b",fontSize:14}}>Staff training compliance for residential care</p>
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,opacity:.8}}>Trainings · Hours · Clearance · Certificates</div></button>
-            <button style={{...S.btn("#334155",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,opacity:.8}}>Admin access · code required</div></button>
+            <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>
+              👤 Employee Portal
+              <div style={{fontSize:12,fontWeight:400,marginTop:3,opacity:.8}}>Trainings · Hours · Clearance · Certificates</div>
+            </button>
+            <button style={{...S.btn("#334155",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>
+              🛡️ Leadership Dashboard
+              <div style={{fontSize:12,fontWeight:400,marginTop:3,opacity:.8}}>Staff overview · Reports · Compliance tracking</div>
+            </button>
           </div>
           <p style={{marginTop:16,fontSize:11,color:"#334155"}}>🌐 Connected to Supabase · Demo Environment</p>
         </div>
