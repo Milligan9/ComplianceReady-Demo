@@ -49,7 +49,7 @@ function DisabledBanner({items}) {
 
 function DisabledButton({label,icon}) {
   return (
-    <div title="Disabled in demo mode" style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 12px",background:"#1e293b",border:"1px solid #334155",borderRadius:8,fontSize:12,color:"#475569",cursor:"not-allowed",userSelect:"none"}}>
+    <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 12px",background:"#1e293b",border:"1px solid #334155",borderRadius:8,fontSize:12,color:"#475569",cursor:"not-allowed",userSelect:"none"}}>
       <span style={{fontSize:11}}>🔒</span>{icon} {label}
     </div>
   );
@@ -159,42 +159,133 @@ const TAG_ICON={"Pre-Service":"🔰","Annual":"📅","Required for Clearance":"�
 function Tag({status}){const s=ST_COLOR[status]||"#9ca3af",bg=ST_BG[status]||"#6b728018",b=ST_BDR[status]||"#6b728040";return<span style={{background:bg,color:s,border:`1px solid ${b}`,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{ST_LBL[status]||"○ Pending"}</span>;}
 function CTag({type}){const c=CT_COLOR[type]||"#9ca3af";return<span style={{background:`${c}22`,color:c,padding:"2px 9px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{CT_ICON[type]} {type}</span>;}
 function TrainingTags({tags}){if(!tags||tags.length===0)return null;return<>{tags.map(tag=><span key={tag} style={{background:TAG_BG[tag]||"#33415518",color:TAG_COLOR[tag]||"#94a3b8",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>{TAG_ICON[tag]} {tag}</span>)}</>;}
-function Bar({val,total,h=7}){const pct=total?Math.round(val/total*100):0;const c=pct===100?"#4ade80":pct>60?"#fbbf24":"#f87171";return<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,background:"#0f172a",borderRadius:99,height:h,overflow:"hidden"}}><div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/></div><span style={{fontSize:11,color:"#64748b",minWidth:36}}>{val}/{total}</span></div>;}
-function HoursBar({completed,required}){   const pct=required?Math.min(Math.round(completed/required*100),100):0;   const c=pct>=100?"#4ade80":pct>60?"#fbbf24":"#f87171";   return<div style={{width:"100%"}}>     <div style={{background:"#0f172a",borderRadius:99,height:8,overflow:"hidden",width:"100%"}}>       <div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/>     </div>     <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>       <span style={{fontSize:10,color:c,fontWeight:700}}>{completed}/{required} hrs</span>       <span style={{fontSize:10,color:"#475569"}}>{pct}%</span>     </div>   </div>; }{const pct=required?Math.min(Math.round(completed/required*100),100):0;const c=pct>=100?"#4ade80":pct>60?"#fbbf24":"#f87171";return<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,background:"#0f172a",borderRadius:99,height:10,overflow:"hidden"}}><div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/></div><span style={{fontSize:12,color:c,fontWeight:700,minWidth:80,textAlign:"right"}}>{completed}/{required} hrs</span></div>;}
-function ClearanceBadge({cleared,lockedSince}){return<span style={{background:cleared?"#16a34a22":"#dc262622",color:cleared?"#4ade80":"#f87171",border:`1px solid ${cleared?"#16a34a55":"#dc262655"}`,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{cleared?`🔑 CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}</span>;}
-function NavBar({title,sub,onBack,onHome,extra}){return<div style={{background:"#1e293b",borderBottom:"1px solid #334155",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,position:"sticky",top:0,zIndex:100}}><div style={{display:"flex",alignItems:"center",gap:8}}>{onBack&&<button style={S.btn("#334155")} onClick={onBack}>← Back</button>}{onHome&&<button style={S.btn("#1e3a5f")} onClick={onHome}>🏠 Home</button>}<div><div style={{fontWeight:700,fontSize:15}}>{title}</div>{sub&&<div style={{fontSize:11,color:"#64748b"}}>{sub}</div>}</div></div><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{extra}</div></div>;}
+
+function Bar({val,total,h=7}){
+  const pct=total?Math.round(val/total*100):0;
+  const c=pct===100?"#4ade80":pct>60?"#fbbf24":"#f87171";
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+      <div style={{flex:1,background:"#0f172a",borderRadius:99,height:h,overflow:"hidden"}}>
+        <div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/>
+      </div>
+      <span style={{fontSize:11,color:"#64748b",minWidth:36}}>{val}/{total}</span>
+    </div>
+  );
+}
+
+function HoursBar({completed,required}){
+  const pct=required?Math.min(Math.round(completed/required*100),100):0;
+  const c=pct>=100?"#4ade80":pct>60?"#fbbf24":"#f87171";
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+      <div style={{flex:1,background:"#0f172a",borderRadius:99,height:10,overflow:"hidden"}}>
+        <div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/>
+      </div>
+      <span style={{fontSize:12,color:c,fontWeight:700,minWidth:80,textAlign:"right"}}>{completed}/{required} hrs</span>
+    </div>
+  );
+}
+
+function ClearanceBadge({cleared,lockedSince}){
+  return(
+    <span style={{background:cleared?"#16a34a22":"#dc262622",color:cleared?"#4ade80":"#f87171",border:`1px solid ${cleared?"#16a34a55":"#dc262655"}`,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
+      {cleared?`🔑 CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}
+    </span>
+  );
+}
+
+function NavBar({title,sub,onBack,onHome,extra}){
+  return(
+    <div style={{background:"#1e293b",borderBottom:"1px solid #334155",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,position:"sticky",top:0,zIndex:100}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        {onBack&&<button style={S.btn("#334155")} onClick={onBack}>← Back</button>}
+        {onHome&&<button style={S.btn("#1e3a5f")} onClick={onHome}>🏠 Home</button>}
+        <div><div style={{fontWeight:700,fontSize:15}}>{title}</div>{sub&&<div style={{fontSize:11,color:"#64748b"}}>{sub}</div>}</div>
+      </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{extra}</div>
+    </div>
+  );
+}
+
 function useToast(){
   const [list,setList]=useState([]);
   function toast(msg,type="info"){const id=Date.now();setList(p=>[...p,{id,msg,type}]);setTimeout(()=>setList(p=>p.filter(t=>t.id!==id)),4000);}
   function Toasts(){const cols={success:"#16a34a",error:"#dc2626",warn:"#ca8a04",info:"#3b82f6"};return<div style={{position:"fixed",bottom:16,right:16,zIndex:1000,display:"flex",flexDirection:"column",gap:6,maxWidth:320}}>{list.map(t=><div key={t.id} style={{background:cols[t.type],color:"#fff",padding:"10px 14px",borderRadius:8,fontSize:13,fontWeight:600,boxShadow:"0 4px 16px #0006",wordBreak:"break-word"}}>{t.msg}</div>)}</div>;}
   return{toast,Toasts};
 }
-function Modal({title,onClose,children,wide}){return<div style={{position:"fixed",inset:0,background:"#000d",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:16,overflowY:"auto"}}><div style={{...S.card,width:"100%",maxWidth:wide?700:460,maxHeight:"92vh",overflowY:"auto"}}>{title&&<h3 style={{margin:"0 0 14px",fontSize:15,fontWeight:700}}>{title}</h3>}{children}<button style={{...S.btn("#334155",true),marginTop:12}} onClick={onClose}>Close</button></div></div>;}
+
+function Modal({title,onClose,children,wide}){
+  return(
+    <div style={{position:"fixed",inset:0,background:"#000d",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:16,overflowY:"auto"}}>
+      <div style={{...S.card,width:"100%",maxWidth:wide?700:460,maxHeight:"92vh",overflowY:"auto"}}>
+        {title&&<h3 style={{margin:"0 0 14px",fontSize:15,fontWeight:700}}>{title}</h3>}
+        {children}
+        <button style={{...S.btn("#334155",true),marginTop:12}} onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
 
 function CollapsibleSection({label,color,bg,done,total,hours,overdue,dueSoon,isEmpty,children}){
   const [open,setOpen]=useState(false);
-  const hasUrgent=overdue>0||dueSoon>0;const empty=isEmpty||total===0;
-  return<div style={{marginBottom:10}}><div onClick={()=>!empty&&setOpen(p=>!p)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:empty?"#1e293b":bg,border:`1px solid ${empty?"#334155":color+"33"}`,borderRadius:open&&!empty?"10px 10px 0 0":"10px",padding:"10px 14px",cursor:empty?"default":"pointer",opacity:empty?0.45:1}}><div style={{display:"flex",alignItems:"center",gap:10,flex:1}}><span style={{fontSize:14,color:empty?"#475569":"#94a3b8",display:"inline-block",transform:open&&!empty?"rotate(90deg)":"rotate(0deg)"}}>▶</span><div style={{flex:1}}><div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><span style={{fontWeight:700,fontSize:13,color:empty?"#475569":color}}>{label}</span>{hasUrgent&&!empty&&<span style={{display:"flex",gap:4}}>{overdue>0&&<span style={{background:"#dc262622",color:"#f87171",border:"1px solid #dc262644",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>🚨 {overdue} Overdue</span>}{dueSoon>0&&<span style={{background:"#ca8a0422",color:"#fbbf24",border:"1px solid #ca8a0444",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>⚠️ {dueSoon} Due Soon</span>}</span>}{empty&&<span style={{fontSize:10,color:"#475569",fontStyle:"italic"}}>None assigned</span>}</div>{!empty&&<div style={{fontSize:11,color:"#94a3b8",marginTop:2}}>{done}/{total} complete{hours>0?` · ${Math.round(hours*10)/10}h earned`:""}</div>}</div>{!empty&&<div style={{minWidth:140,marginLeft:8}}><Bar val={done} total={total} h={6}/></div>}</div></div>{open&&!empty&&<div style={{background:"#1e293b",border:`1px solid ${color}22`,borderTop:"none",borderRadius:"0 0 10px 10px",padding:"10px 10px 4px"}}>{children}</div>}</div>;
+  const hasUrgent=overdue>0||dueSoon>0;
+  const empty=isEmpty||total===0;
+  return(
+    <div style={{marginBottom:10}}>
+      <div onClick={()=>!empty&&setOpen(p=>!p)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:empty?"#1e293b":bg,border:`1px solid ${empty?"#334155":color+"33"}`,borderRadius:open&&!empty?"10px 10px 0 0":"10px",padding:"10px 14px",cursor:empty?"default":"pointer",opacity:empty?0.45:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
+          <span style={{fontSize:14,color:empty?"#475569":"#94a3b8",display:"inline-block",transform:open&&!empty?"rotate(90deg)":"rotate(0deg)"}}>▶</span>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <span style={{fontWeight:700,fontSize:13,color:empty?"#475569":color}}>{label}</span>
+              {hasUrgent&&!empty&&<span style={{display:"flex",gap:4}}>
+                {overdue>0&&<span style={{background:"#dc262622",color:"#f87171",border:"1px solid #dc262644",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>🚨 {overdue} Overdue</span>}
+                {dueSoon>0&&<span style={{background:"#ca8a0422",color:"#fbbf24",border:"1px solid #ca8a0444",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>⚠️ {dueSoon} Due Soon</span>}
+              </span>}
+              {empty&&<span style={{fontSize:10,color:"#475569",fontStyle:"italic"}}>None assigned</span>}
+            </div>
+            {!empty&&<div style={{fontSize:11,color:"#94a3b8",marginTop:2}}>{done}/{total} complete{hours>0?` · ${Math.round(hours*10)/10}h earned`:""}</div>}
+          </div>
+          {!empty&&<div style={{minWidth:140,marginLeft:8}}><Bar val={done} total={total} h={6}/></div>}
+        </div>
+      </div>
+      {open&&!empty&&<div style={{background:"#1e293b",border:`1px solid ${color}22`,borderTop:"none",borderRadius:"0 0 10px 10px",padding:"10px 10px 4px"}}>{children}</div>}
+    </div>
+  );
 }
 
 // ── EMPLOYEE PORTAL ───────────────────────────────────────────────────────────
 function EmpPortal({employees,library,goHome}){
-  const [nameQ,setNameQ]=useState("");const [pinQ,setPinQ]=useState("");
-  const [empId,setEmpId]=useState(null);const [err,setErr]=useState("");
-  const [tab,setTab]=useState("trainings");const [trSearch,setTrSearch]=useState("");
+  const [nameQ,setNameQ]=useState("");
+  const [pinQ,setPinQ]=useState("");
+  const [empId,setEmpId]=useState(null);
+  const [err,setErr]=useState("");
+  const [tab,setTab]=useState("trainings");
+  const [trSearch,setTrSearch]=useState("");
   const {toast,Toasts}=useToast();
   const emp=employees.find(e=>e.id===empId);
 
-  function login(){const f=employees.find(e=>e.name.toLowerCase()===nameQ.trim().toLowerCase()&&e.pin===pinQ.trim());if(f){setEmpId(f.id);setErr("");}else setErr("Name or passcode not found. Contact your supervisor.");}
+  function login(){
+    const f=employees.find(e=>e.name.toLowerCase()===nameQ.trim().toLowerCase()&&e.pin===pinQ.trim());
+    if(f){setEmpId(f.id);setErr("");}
+    else setErr("Name or passcode not found. Contact your supervisor.");
+  }
 
-  if(!emp)return(
+  if(!emp) return(
     <div style={S.page}><DemoBanner/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 60px)"}}>
-        <Toasts/><div style={{width:"100%",maxWidth:380}}>
-          <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:48,marginBottom:8}}>🎓</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>ComplianceReady Demo</h1><p style={{margin:0,color:"#64748b",fontSize:14}}>Sign in to view your trainings</p></div>
+        <Toasts/>
+        <div style={{width:"100%",maxWidth:380}}>
+          <div style={{textAlign:"center",marginBottom:24}}>
+            <div style={{fontSize:48,marginBottom:8}}>🎓</div>
+            <h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>ComplianceReady Demo</h1>
+            <p style={{margin:0,color:"#64748b",fontSize:14}}>Sign in to view your trainings</p>
+          </div>
           <div style={S.card}>
-            <label style={S.lbl}>Full Name</label><input style={{...S.inp,marginBottom:12}} value={nameQ} onChange={e=>setNameQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Your full name"/>
-            <label style={S.lbl}>Passcode</label><input style={{...S.inp,marginBottom:12}} type="password" value={pinQ} onChange={e=>setPinQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Your passcode"/>
+            <label style={S.lbl}>Full Name</label>
+            <input style={{...S.inp,marginBottom:12}} value={nameQ} onChange={e=>setNameQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Your full name"/>
+            <label style={S.lbl}>Passcode</label>
+            <input style={{...S.inp,marginBottom:12}} type="password" value={pinQ} onChange={e=>setPinQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Your passcode"/>
             {err&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{err}</div>}
             <button style={S.btn("#3b82f6",true)} onClick={login}>Sign In</button>
             <button style={{...S.btn("#334155",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button>
@@ -219,13 +310,22 @@ function EmpPortal({employees,library,goHome}){
     {label:"📅 Annual",key:"Annual",color:"#3b82f6",bg:"#3b82f615"},
     {label:"📋 Other",key:"Other",color:"#64748b",bg:"#64748b15"},
   ];
-  function getGroupKey(t){if(t.tags?.includes("Acknowledgement"))return"Acknowledgement";if(t.tags?.includes("Required for Clearance"))return"Required for Clearance";if(t.tags?.includes("Pre-Service"))return"Pre-Service";if(t.tags?.includes("Annual"))return"Annual";return"Other";}
+  function getGroupKey(t){
+    if(t.tags?.includes("Acknowledgement"))return"Acknowledgement";
+    if(t.tags?.includes("Required for Clearance"))return"Required for Clearance";
+    if(t.tags?.includes("Pre-Service"))return"Pre-Service";
+    if(t.tags?.includes("Annual"))return"Annual";
+    return"Other";
+  }
   const searchLower=(trSearch||"").toLowerCase().trim();
   const filteredTrainings=searchLower?assignedTrainings.filter(t=>t?.name?.toLowerCase().includes(searchLower)):assignedTrainings;
-  const grouped={};groups.forEach(g=>{grouped[g.key]=[];});filteredTrainings.forEach(t=>{if(!t)return;const key=getGroupKey(t);if(!grouped[key])grouped[key]=[];grouped[key].push(t);});
+  const grouped={};
+  groups.forEach(g=>{grouped[g.key]=[];});
+  filteredTrainings.forEach(t=>{if(!t)return;const key=getGroupKey(t);if(!grouped[key])grouped[key]=[];grouped[key].push(t);});
 
   const done=assignedTrainings.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="complete").length;
-  const completedHrs=calcCompletedHours(emp,library);const reqHrs=requiredHours(emp);
+  const completedHrs=calcCompletedHours(emp,library);
+  const reqHrs=requiredHours(emp);
   const {cleared,missing,lockedSince}=getClearanceStatus(emp,library);
   const badges=calcBadges(emp);
   const certCount=assignedTrainings.filter(t=>t?.certificate).length;
@@ -237,55 +337,52 @@ function EmpPortal({employees,library,goHome}){
     const hrs=effectiveHours(t,t)||0;
     const isComplete=st==="complete";
     const hasCert=!!t?.certificate;
-
-    return<div style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:8}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:6,marginBottom:4}}>
-        <span style={{fontWeight:600,fontSize:13,flex:1}}>{t.name}</span>
-        <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
-          {hasCert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 Cert ✓</span>}
-          <CTag type={t.ctype}/><Tag status={st}/>
+    return(
+      <div style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:8}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:6,marginBottom:4}}>
+          <span style={{fontWeight:600,fontSize:13,flex:1}}>{t.name}</span>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
+            {hasCert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 7px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 Cert ✓</span>}
+            <CTag type={t.ctype}/><Tag status={st}/>
+          </div>
+        </div>
+        {hrs>0&&!isAck&&<div style={{marginBottom:4}}>
+          <span style={{fontSize:11,fontWeight:700,color:isComplete?"#4ade80":"#64748b",background:isComplete?"#16a34a18":"#33415518",padding:"1px 8px",borderRadius:99}}>
+            ⏱ {hrs}h{!isComplete&&<span style={{color:"#475569",fontWeight:400}}> (pending)</span>}
+          </span>
+        </div>}
+        <div style={{fontSize:11,color:"#64748b",marginBottom:6,display:"flex",gap:12,flexWrap:"wrap"}}>
+          {t.dueDate&&<span>Due: <span style={{color:ST_COLOR[st]}}>{t.dueDate}</span></span>}
+          {t.completed&&<span>✓ <span style={{color:"#4ade80"}}>{t.completed}</span></span>}
+          {t.initials&&<span>Initials: <span style={{color:"#60a5fa",fontFamily:"Georgia,serif",fontWeight:700}}>{t.initials}</span></span>}
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:4}}>
+          {t.ctype==="Read and Acknowledge"&&(
+            isComplete
+              ?<span style={{fontSize:11,color:"#4ade80"}}>✍️ Signed & Acknowledged</span>
+              :<DisabledButton icon="✍️" label="Read & Sign to Acknowledge"/>
+          )}
+          {t.ctype==="Read and Quiz"&&<>
+            {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>📄 Open Material ↗</a>}
+            {isComplete
+              ?<span style={{fontSize:11,color:"#4ade80"}}>📝 Quiz Passed</span>
+              :<DisabledButton icon="📝" label="Take Quiz"/>}
+          </>}
+          {t.ctype==="Link"&&<>
+            {t.link
+              ?<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#16a34a"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>
+              :<DisabledButton icon="🔗" label="Link coming soon"/>}
+            {!isComplete&&<DisabledButton icon="✓" label="Mark Complete (Leadership only)"/>}
+          </>}
+          {t.ctype==="Certificate"&&<>
+            {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>}
+            {isComplete&&hasCert
+              ?<span style={{fontSize:11,color:"#4ade80"}}>🏆 Certificate uploaded</span>
+              :<DisabledButton icon="🏆" label="Upload Certificate"/>}
+          </>}
         </div>
       </div>
-
-      {hrs>0&&!isAck&&<div style={{marginBottom:4}}>
-        <span style={{fontSize:11,fontWeight:700,color:isComplete?"#4ade80":"#64748b",background:isComplete?"#16a34a18":"#33415518",padding:"1px 8px",borderRadius:99}}>
-          ⏱ {hrs}h{!isComplete&&<span style={{color:"#475569",fontWeight:400}}> (pending)</span>}
-        </span>
-      </div>}
-
-      <div style={{fontSize:11,color:"#64748b",marginBottom:6,display:"flex",gap:12,flexWrap:"wrap"}}>
-        {t.dueDate&&<span>Due: <span style={{color:ST_COLOR[st]}}>{t.dueDate}</span></span>}
-        {t.completed&&<span>✓ <span style={{color:"#4ade80"}}>{t.completed}</span></span>}
-        {t.initials&&<span>Initials: <span style={{color:"#60a5fa",fontFamily:"Georgia,serif",fontWeight:700}}>{t.initials}</span></span>}
-      </div>
-
-      {/* Show completion actions — all disabled in demo */}
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:4}}>
-        {t.ctype==="Read and Acknowledge"&&(
-          isComplete
-            ?<span style={{fontSize:11,color:"#4ade80"}}>✍️ Signed & Acknowledged</span>
-            :<DisabledButton icon="✍️" label="Read & Sign to Acknowledge"/>
-        )}
-        {t.ctype==="Read and Quiz"&&<>
-          {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>📄 Open Material ↗</a>}
-          {isComplete
-            ?<span style={{fontSize:11,color:"#4ade80"}}>📝 Quiz Passed</span>
-            :<DisabledButton icon="📝" label="Take Quiz"/>}
-        </>}
-        {t.ctype==="Link"&&<>
-          {t.link
-            ?<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#16a34a"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>
-            :<DisabledButton icon="🔗" label="Link coming soon"/>}
-          {!isComplete&&<DisabledButton icon="✓" label="Mark Complete (Leadership only)"/>}
-        </>}
-        {t.ctype==="Certificate"&&<>
-          {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{...S.btn("#1e3a5f"),textDecoration:"none",display:"inline-block",fontSize:12,padding:"5px 12px"}}>🔗 Go to Training ↗</a>}
-          {isComplete&&hasCert
-            ?<span style={{fontSize:11,color:"#4ade80"}}>🏆 Certificate uploaded</span>
-            :<DisabledButton icon="🏆" label="Upload Certificate"/>}
-        </>}
-      </div>
-    </div>;
+    );
   }
 
   return(
@@ -298,7 +395,6 @@ function EmpPortal({employees,library,goHome}){
       />
       <div style={{padding:16,maxWidth:780,margin:"0 auto"}}>
 
-        {/* Employee Info Card */}
         <div style={{...S.card,marginBottom:12,display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
           <div><div style={S.lbl}>Start Date</div><div style={{fontWeight:600,fontSize:13}}>{emp.hire}</div></div>
           {emp.email&&<div><div style={S.lbl}>Email</div><div style={{fontSize:13,color:"#94a3b8"}}>{emp.email}</div></div>}
@@ -313,11 +409,10 @@ function EmpPortal({employees,library,goHome}){
           "Marking Link trainings complete",
           "Saving any completions",
           "Changing passcode",
-          "Viewing leaderboard scores",
-          "Earning badges (display only)",
+          "Viewing leaderboard",
+          "Earning new badges (display only)",
         ]}/>
 
-        {/* Clearance Banner */}
         <div style={{background:cleared?"#16a34a18":"#dc262618",border:`1px solid ${cleared?"#16a34a44":"#dc262644"}`,borderRadius:10,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:24}}>{cleared?"✅":"⛔"}</span>
@@ -330,7 +425,6 @@ function EmpPortal({employees,library,goHome}){
           <ClearanceBadge cleared={cleared} lockedSince={lockedSince}/>
         </div>
 
-        {/* Stats */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
           {[
             {l:"Done",v:`${done}/${assignedTrainings.length}`,c:done===assignedTrainings.length?"#4ade80":"#60a5fa"},
@@ -345,7 +439,6 @@ function EmpPortal({employees,library,goHome}){
           ))}
         </div>
 
-        {/* Hours Bar */}
         <div style={{...S.card,marginBottom:12}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
             <div style={S.lbl}>Annual Training Hours</div>
@@ -356,7 +449,6 @@ function EmpPortal({employees,library,goHome}){
           {completedHrs>=reqHrs&&<div style={{fontSize:11,color:"#4ade80",marginTop:4}}>✓ Annual hour requirement met!</div>}
         </div>
 
-        {/* Badges */}
         {badges.length>0&&<div style={{...S.card,marginBottom:12}}>
           <div style={{...S.lbl,marginBottom:8}}>🎖️ Your Badges</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -364,7 +456,6 @@ function EmpPortal({employees,library,goHome}){
           </div>
         </div>}
 
-        {/* Tabs */}
         <div style={{display:"flex",gap:8,marginBottom:12}}>
           <button style={S.btn(tab==="trainings"?"#3b82f6":"#334155",true)} onClick={()=>setTab("trainings")}>📋 My Trainings</button>
           <button style={{...S.btn(tab==="certs"?"#3b82f6":"#334155",true),position:"relative"}} onClick={()=>setTab("certs")}>
@@ -385,9 +476,11 @@ function EmpPortal({employees,library,goHome}){
             const grpHrs=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="complete").reduce((a,t)=>a+effectiveHours(t,t),0);
             const grpOverdue=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="overdue").length;
             const grpSoon=grp.filter(t=>getStatus(t.completed,t.dueDate,emp?.hire,t.renewal_cycle,t.tags?.includes("Acknowledgement"))==="soon").length;
-            return<CollapsibleSection key={g.key} label={g.label} color={g.color} bg={g.bg} done={grpDone} total={grp.length} hours={grpHrs} overdue={grpOverdue} dueSoon={grpSoon} isEmpty={allInGroup.length===0}>
-              {grp.map(t=><TrainingCard key={t.id} t={t}/>)}
-            </CollapsibleSection>;
+            return(
+              <CollapsibleSection key={g.key} label={g.label} color={g.color} bg={g.bg} done={grpDone} total={grp.length} hours={grpHrs} overdue={grpOverdue} dueSoon={grpSoon} isEmpty={allInGroup.length===0}>
+                {grp.map(t=><TrainingCard key={t.id} t={t}/>)}
+              </CollapsibleSection>
+            );
           })}
         </div>}
 
@@ -397,21 +490,23 @@ function EmpPortal({employees,library,goHome}){
             {certCount>0&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"2px 10px",borderRadius:99,fontSize:12,fontWeight:700}}>🏆 {certCount} on file</span>}
           </div>
           <DisabledBanner items={["Uploading new certificates","Replacing existing certificates","Downloading certificates"]}/>
-          <p style={{fontSize:12,color:"#64748b",margin:"0 0 12px",lineHeight:1.6}}>In the full version, employees upload completion certificates (PDF, JPG, PNG — max 5MB) which are stored securely and visible to leadership for compliance audits.</p>
+          <p style={{fontSize:12,color:"#64748b",margin:"0 0 12px",lineHeight:1.6}}>In the full version, employees upload completion certificates (PDF, JPG, PNG — max 5MB) stored securely and visible to leadership for compliance audits.</p>
           {assignedTrainings.map(t=>{
             const cert=t.certificate;
-            return<div key={t.id} style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${cert?"#16a34a44":"#334155"}`,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-              <div style={{flex:1}}>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontWeight:600,fontSize:13}}>{t.name}</span>
-                  {cert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 6px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 ✓</span>}
+            return(
+              <div key={t.id} style={{padding:"10px 12px",background:"#0f172a",borderRadius:8,border:`1px solid ${cert?"#16a34a44":"#334155"}`,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontWeight:600,fontSize:13}}>{t.name}</span>
+                    {cert&&<span style={{background:"#16a34a22",color:"#4ade80",border:"1px solid #16a34a55",padding:"1px 6px",borderRadius:99,fontSize:10,fontWeight:700}}>🏆 ✓</span>}
+                  </div>
+                  {cert
+                    ?<div style={{fontSize:11,color:"#4ade80",marginTop:2}}>✓ {cert.name} · {cert.date}</div>
+                    :<div style={{fontSize:11,color:"#475569",marginTop:2}}>No certificate uploaded</div>}
                 </div>
-                {cert
-                  ?<div style={{fontSize:11,color:"#4ade80",marginTop:2}}>✓ {cert.name} · {cert.date}</div>
-                  :<div style={{fontSize:11,color:"#475569",marginTop:2}}>No certificate uploaded</div>}
+                <DisabledButton icon={cert?"🔄":"⬆"} label={cert?"Replace":"Upload"}/>
               </div>
-              <DisabledButton icon={cert?"🔄":"⬆"} label={cert?"Replace":"Upload"}/>
-            </div>;
+            );
           })}
         </div>}
       </div>
@@ -426,9 +521,13 @@ function AdminPortalDemo({employees,library,goHome}){
 
   function stats(e){
     const ts=Object.entries(e.trainings||{});
-    const hrs=calcCompletedHours(e,library);const req=requiredHours(e);
+    const hrs=calcCompletedHours(e,library);
+    const req=requiredHours(e);
     const {cleared}=getClearanceStatus(e,library);
-    return{done:ts.filter(([,v])=>getStatus(v?.completed,v?.dueDate)==="complete").length,total:ts.length,hrs,req,cleared};
+    return{
+      done:ts.filter(([,v])=>getStatus(v?.completed,v?.dueDate)==="complete").length,
+      total:ts.length,hrs,req,cleared
+    };
   }
 
   function printGroupReport(){
@@ -454,22 +553,23 @@ function AdminPortalDemo({employees,library,goHome}){
     </div>
     <table><thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Hire Date</th><th>Clearance</th><th>Hours</th><th>Trainings Done</th><th>Overdue</th></tr></thead>
     <tbody>${rows}</tbody></table>
-    <p style="font-size:10px;color:#999;margin-top:20px;">This report was generated from ComplianceReady demo data. Contact us to set up your facility.</p>
+    <p style="font-size:10px;color:#999;margin-top:20px;">Generated from ComplianceReady demo data.</p>
     </body></html>`;
     const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
   }
 
   function printEmpReport(emp){
     const {cleared,lockedSince,missing}=getClearanceStatus(emp,library);
-    const hrs=calcCompletedHours(emp,library);const req=requiredHours(emp);
+    const hrs=calcCompletedHours(emp,library);
+    const req=requiredHours(emp);
     const assignedIds=Object.keys(emp.trainings||{});
     const rows=assignedIds.map(id=>{
       const libTr=library.find(t=>t.id===id)||{name:id,ctype:"",tags:[],renewal_cycle:"",default_hours:0};
       const v=emp.trainings[id]||{};
       const st=getStatus(v.completed,v.dueDate,emp.hire,libTr.renewal_cycle,libTr.tags?.includes("Acknowledgement"));
       const statusColor=st==="complete"?"green":st==="overdue"?"red":"orange";
-      const hrs2=effectiveHours(libTr,v);
-      return`<tr><td>${libTr.name}</td><td>${libTr.ctype||""}</td><td style="text-align:right">${hrs2>0?hrs2+"h":"—"}</td><td>${v.dueDate||""}</td><td>${v.completed||""}</td><td>${v.initials||""}</td><td style="color:${statusColor};font-weight:bold">${ST_LBL[st]||st}</td></tr>`;
+      const h=effectiveHours(libTr,v);
+      return`<tr><td>${libTr.name}</td><td>${libTr.ctype||""}</td><td style="text-align:right">${h>0?h+"h":"—"}</td><td>${v.dueDate||""}</td><td>${v.completed||""}</td><td>${v.initials||""}</td><td style="color:${statusColor};font-weight:bold">${ST_LBL[st]||st}</td></tr>`;
     }).join("");
     const html=`<!DOCTYPE html><html><head><title>Compliance Report — ${emp.name}</title>
     <style>body{font-family:Arial,sans-serif;padding:20px;font-size:12px;}h1{font-size:18px;margin:0 0 4px;}h2{font-size:13px;color:#334155;margin:0 0 14px;font-weight:normal;}table{width:100%;border-collapse:collapse;margin-top:12px;}th{background:#1e293b;color:white;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;}tr:nth-child(even){background:#f8fafc;}.badge{padding:3px 10px;border-radius:16px;font-weight:bold;font-size:12px;}.cleared{background:#dcfce7;color:#16a34a;}.notcleared{background:#fee2e2;color:#dc2626;}.sum{display:flex;gap:12px;margin:12px 0;flex-wrap:wrap;}.st{background:#f8fafc;padding:10px 14px;border-radius:8px;text-align:center;border:1px solid #e2e8f0;}.sn{font-size:20px;font-weight:bold;}.sl{font-size:10px;color:#64748b;}.sig{display:flex;gap:36px;margin-top:36px;}.sig-line{flex:1;border-top:1px solid #334155;padding-top:4px;font-size:9px;color:#64748b;}@media print{@page{margin:0.5in;}}</style>
@@ -477,7 +577,7 @@ function AdminPortalDemo({employees,library,goHome}){
     <h1>ComplianceReady — Individual Compliance Report</h1>
     <h2>${emp.name} · ${emp.pos} · ${emp.type}</h2>
     <p style="font-size:11px;color:#64748b;margin:0 0 8px;">Generated: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})} · DEMO DATA ONLY · Hire Date: ${emp.hire}</p>
-    ${emp.email?`<p style="font-size:11px;color:#64748b;margin:0 0 12px;">Email: ${emp.email} · Phone: ${emp.phone||"—"}</p>`:""}
+    ${emp.email?`<p style="font-size:11px;color:#64748b;margin:0 0 12px;">Email: ${emp.email}${emp.phone?" · Phone: "+emp.phone:""}</p>`:""}
     <p><span class="badge ${cleared?"cleared":"notcleared"}">${cleared?`✅ CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}</span></p>
     ${!cleared?`<p style="font-size:11px;color:#dc2626;">Missing for clearance: ${missing.map(t=>t.name).join(", ")}</p>`:""}
     <div class="sum">
@@ -488,7 +588,6 @@ function AdminPortalDemo({employees,library,goHome}){
     <table><thead><tr><th style="width:30%">Training</th><th style="width:14%">Type</th><th style="width:6%;text-align:right">Hours</th><th style="width:10%">Due Date</th><th style="width:10%">Completed</th><th style="width:7%">Initials</th><th style="width:10%">Status</th></tr></thead>
     <tbody>${rows}</tbody></table>
     <div class="sig"><div class="sig-line">Employee Signature &amp; Date</div><div class="sig-line">Supervisor Signature &amp; Date</div><div class="sig-line">Title &amp; Date</div></div>
-    <p style="font-size:10px;color:#999;margin-top:16px;">Generated from ComplianceReady demo data.</p>
     </body></html>`;
     const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
   }
@@ -518,16 +617,23 @@ function AdminPortalDemo({employees,library,goHome}){
           "AI compliance assistant",
           "In-service session logging",
           "Uploading or downloading certificates",
-          "Exporting full compliance reports (individual reports available below)",
+          "Full individual compliance reports (summary reports available — click any staff card)",
         ]}/>
 
         {notClearedEmps.length>0&&<div style={{background:"#dc262618",border:"1px solid #dc262644",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:18}}>⛔</span>
-          <div><div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div><div style={{fontSize:12,color:"#94a3b8"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div></div>
+          <div>
+            <div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div>
+            <div style={{fontSize:12,color:"#94a3b8"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div>
+          </div>
         </div>}
+
         {overdueEmps.length>0&&<div style={{background:"#ca8a0418",border:"1px solid #ca8a0444",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:18}}>🚨</span>
-          <div><div style={{fontWeight:700,color:"#fbbf24",fontSize:14}}>{overdueEmps.length} staff with overdue trainings</div><div style={{fontSize:12,color:"#94a3b8"}}>{overdueEmps.map(e=>e.name).join(", ")}</div></div>
+          <div>
+            <div style={{fontWeight:700,color:"#fbbf24",fontSize:14}}>{overdueEmps.length} staff with overdue trainings</div>
+            <div style={{fontSize:12,color:"#94a3b8"}}>{overdueEmps.map(e=>e.name).join(", ")}</div>
+          </div>
         </div>}
 
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,marginBottom:14}}>
@@ -551,60 +657,87 @@ function AdminPortalDemo({employees,library,goHome}){
             const {done,total,hrs,req,cleared}=stats(emp);
             const hasOver=Object.values(emp.trainings||{}).some(v=>getStatus(v?.completed,v?.dueDate)==="overdue");
             const bc=!cleared?"#ef4444":hasOver?"#f87171":hrs<req?"#fbbf24":done===total&&total>0?"#4ade80":"#334155";
-            return<div key={emp.id} style={{...S.card,cursor:"pointer",borderColor:bc,padding:13}} onClick={()=>setSelId(emp.id)}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                <div>
-                  <div style={{fontWeight:700,fontSize:13}}>{emp.name}</div>
-                  <div style={{fontSize:11,color:"#60a5fa",marginTop:1}}>{emp.pos}</div>
-                  <div style={{fontSize:10,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1":"Year 2+"}</div>
-                  {emp.email&&<div style={{fontSize:10,color:"#64748b",marginTop:2}}>✉ {emp.email}</div>}
-                  {emp.phone&&<div style={{fontSize:10,color:"#64748b"}}>📞 {emp.phone}</div>}
+            const pct=total?Math.round(done/total*100):0;
+            const hrsPct=req?Math.min(Math.round(hrs/req*100),100):0;
+            const barColor=(p)=>p===100?"#4ade80":p>60?"#fbbf24":"#f87171";
+            return(
+              <div key={emp.id} style={{...S.card,cursor:"pointer",borderColor:bc,padding:13}} onClick={()=>setSelId(emp.id)}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  <div style={{flex:1,minWidth:0,paddingRight:8}}>
+                    <div style={{fontWeight:700,fontSize:13}}>{emp.name}</div>
+                    <div style={{fontSize:11,color:"#60a5fa",marginTop:1}}>{emp.pos}</div>
+                    <div style={{fontSize:10,color:"#64748b"}}>{emp.type} · {isYear1(emp.hire)?"Year 1":"Year 2+"}</div>
+                    {emp.email&&<div style={{fontSize:10,color:"#64748b",marginTop:3}}>✉ {emp.email}</div>}
+                    {emp.phone&&<div style={{fontSize:10,color:"#64748b"}}>📞 {emp.phone}</div>}
+                  </div>
+                  <ClearanceBadge cleared={cleared}/>
                 </div>
-                <ClearanceBadge cleared={cleared}/>
+                <div style={{marginBottom:6}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:10,color:"#64748b"}}>Training Progress</span>
+                    <span style={{fontSize:10,color:"#64748b"}}>{done}/{total}</span>
+                  </div>
+                  <div style={{background:"#0f172a",borderRadius:99,height:6,overflow:"hidden"}}>
+                    <div style={{width:`${pct}%`,background:barColor(pct),height:"100%",borderRadius:99}}/>
+                  </div>
+                </div>
+                <div>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:10,color:"#64748b"}}>Annual Hours</span>
+                    <span style={{fontSize:10,color:barColor(hrsPct),fontWeight:700}}>{hrs}/{req}h</span>
+                  </div>
+                  <div style={{background:"#0f172a",borderRadius:99,height:6,overflow:"hidden"}}>
+                    <div style={{width:`${hrsPct}%`,background:barColor(hrsPct),height:"100%",borderRadius:99}}/>
+                  </div>
+                </div>
+                {hasOver&&<div style={{marginTop:8}}><span style={{background:"#dc262622",color:"#f87171",padding:"1px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>🚨 Has Overdue Trainings</span></div>}
               </div>
-              <div style={{marginBottom:4}}><div style={{fontSize:10,color:"#64748b",marginBottom:2}}>Training Progress</div><Bar val={done} total={total}/></div>
-              <div><div style={{fontSize:10,color:"#64748b",marginBottom:2}}>Annual Hours</div><HoursBar completed={hrs} required={req}/></div>
-              {hasOver&&<div style={{marginTop:6}}><span style={{background:"#dc262622",color:"#f87171",padding:"1px 8px",borderRadius:99,fontSize:10,fontWeight:700}}>🚨 Has Overdue Trainings</span></div>}
-            </div>;
+            );
           })}
         </div>
 
         {selId&&(()=>{
-          const emp=employees.find(e=>e.id===selId);if(!emp)return null;
+          const emp=employees.find(e=>e.id===selId);
+          if(!emp)return null;
           const {cleared,lockedSince,missing}=getClearanceStatus(emp,library);
-          const hrs=calcCompletedHours(emp,library);const req=requiredHours(emp);
+          const hrs=calcCompletedHours(emp,library);
+          const req=requiredHours(emp);
           const assignedIds=Object.keys(emp.trainings||{});
-          return<Modal title={`📋 ${emp.name} — Training Detail`} onClose={()=>setSelId(null)} wide>
-            <div style={{display:"flex",gap:10,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
-              <ClearanceBadge cleared={cleared} lockedSince={lockedSince}/>
-              <span style={{fontSize:13,color:hrs>=req?"#4ade80":"#fbbf24",fontWeight:700}}>{hrs}/{req}h Annual Hours</span>
-              <button style={{...S.btn("#1e3a5f"),marginLeft:"auto",fontSize:12,padding:"5px 14px"}} onClick={()=>printEmpReport(emp)}>📊 Print Individual Report</button>
-            </div>
-            {emp.email&&<div style={{fontSize:12,color:"#64748b",marginBottom:4}}>✉ {emp.email} {emp.phone&&`· 📞 ${emp.phone}`}</div>}
-            {!cleared&&<div style={{fontSize:12,color:"#f87171",marginBottom:8,background:"#dc262618",padding:"8px 10px",borderRadius:6}}>⛔ Missing for clearance: {missing.map(t=>t.name).join(", ")}</div>}
-            <DisabledBanner items={["Editing completions","Resetting trainings","Granting or revoking clearance","Adding hours"]}/>
-            <div style={{maxHeight:400,overflowY:"auto"}}>
-              {assignedIds.map(id=>{
-                const libTr=library.find(t=>t.id===id)||{name:id,ctype:"",tags:[],renewal_cycle:"12 Months",default_hours:0};
-                const v=emp.trainings[id]||{};
-                const st=getStatus(v.completed,v.dueDate,emp.hire,libTr.renewal_cycle,libTr.tags?.includes("Acknowledgement"));
-                const tHrs=effectiveHours(libTr,v);
-                return<div key={id} style={{padding:"8px 10px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:6,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:600,fontSize:12}}>{libTr.name}</div>
-                    <div style={{fontSize:11,color:"#64748b",display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
-                      <CTag type={libTr.ctype}/>
-                      {tHrs>0&&<span style={{color:st==="complete"?"#4ade80":"#64748b"}}>⏱ {tHrs}h</span>}
-                      {v.completed&&<span>✓ {v.completed}</span>}
-                      {v.dueDate&&!v.completed&&<span>Due: {v.dueDate}</span>}
-                      {v.initials&&<span>Initials: <span style={{fontFamily:"Georgia,serif",fontWeight:700,color:"#60a5fa"}}>{v.initials}</span></span>}
+          return(
+            <Modal title={`📋 ${emp.name} — Training Detail`} onClose={()=>setSelId(null)} wide>
+              <div style={{display:"flex",gap:10,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
+                <ClearanceBadge cleared={cleared} lockedSince={lockedSince}/>
+                <span style={{fontSize:13,color:hrs>=req?"#4ade80":"#fbbf24",fontWeight:700}}>{hrs}/{req}h Annual Hours</span>
+                <button style={{...S.btn("#1e3a5f"),marginLeft:"auto",fontSize:12,padding:"5px 14px"}} onClick={()=>printEmpReport(emp)}>📊 Print Individual Report</button>
+              </div>
+              {emp.email&&<div style={{fontSize:12,color:"#64748b",marginBottom:4}}>✉ {emp.email}{emp.phone&&` · 📞 ${emp.phone}`}</div>}
+              {!cleared&&<div style={{fontSize:12,color:"#f87171",marginBottom:8,background:"#dc262618",padding:"8px 10px",borderRadius:6}}>⛔ Missing for clearance: {missing.map(t=>t.name).join(", ")}</div>}
+              <DisabledBanner items={["Editing completions","Resetting trainings","Granting or revoking clearance","Adding hours"]}/>
+              <div style={{maxHeight:400,overflowY:"auto"}}>
+                {assignedIds.map(id=>{
+                  const libTr=library.find(t=>t.id===id)||{name:id,ctype:"",tags:[],renewal_cycle:"12 Months",default_hours:0};
+                  const v=emp.trainings[id]||{};
+                  const st=getStatus(v.completed,v.dueDate,emp.hire,libTr.renewal_cycle,libTr.tags?.includes("Acknowledgement"));
+                  const tHrs=effectiveHours(libTr,v);
+                  return(
+                    <div key={id} style={{padding:"8px 10px",background:"#0f172a",borderRadius:8,border:`1px solid ${ST_BDR[st]}`,marginBottom:6,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontWeight:600,fontSize:12}}>{libTr.name}</div>
+                        <div style={{fontSize:11,color:"#64748b",display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+                          <CTag type={libTr.ctype}/>
+                          {tHrs>0&&<span style={{color:st==="complete"?"#4ade80":"#64748b"}}>⏱ {tHrs}h</span>}
+                          {v.completed&&<span>✓ {v.completed}</span>}
+                          {v.dueDate&&!v.completed&&<span>Due: {v.dueDate}</span>}
+                          {v.initials&&<span>Initials: <span style={{fontFamily:"Georgia,serif",fontWeight:700,color:"#60a5fa"}}>{v.initials}</span></span>}
+                        </div>
+                      </div>
+                      <Tag status={st}/>
                     </div>
-                  </div>
-                  <Tag status={st}/>
-                </div>;
-              })}
-            </div>
-          </Modal>;
+                  );
+                })}
+              </div>
+            </Modal>
+          );
         })()}
       </div>
     </div>
@@ -666,7 +799,8 @@ export default function App(){
           bulkHours:bulkRes.data||[],
         };
       }));
-      setLibrary(lib);setEmployees(emps);
+      setLibrary(lib);
+      setEmployees(emps);
     }catch(e){console.error("Load error:",e);}
     finally{setLoading(false);}
   }
