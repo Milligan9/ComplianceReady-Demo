@@ -4851,35 +4851,49 @@ export default function App(){
     </div>
   );
   return(
-    <div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div style={{width:"100%",maxWidth:400,textAlign:"center"}}>
-        {/* Demo Banner */}
-        <div style={{background:"#2563eb",color:"#fff",borderRadius:10,padding:"10px 16px",marginBottom:20,border:"1px solid #1d4ed8"}}>
-          <div style={{fontWeight:800,fontSize:13,marginBottom:2}}>🎓 ComplianceReady — Interactive Demo</div>
-          <div style={{fontSize:11,opacity:.9,marginBottom:8}}>Explore the full platform. Data resets periodically.</div>
-          <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#fff",color:"#2563eb",padding:"5px 16px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none"}}>📅 Book a Live Demo</a>
-        </div>
-        <div style={{fontSize:52,marginBottom:12}}>🎓</div>
-        <h1 style={{margin:"0 0 6px",fontSize:24,fontWeight:800}}>SHYH Training Tracker</h1>
-        <p style={{margin:"0 0 28px",color:"#64748b",fontSize:14}}>Stay on top of annual training requirements</p>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
-          <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>           <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, employee records</div></button>           <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
-        </div>
-        <div style={{...S.card,marginTop:20,textAlign:"left"}}>
-          <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Demo Employee Sign-In</div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:"4px 16px",fontSize:12}}>
-            {[["Priya Nair","8847"],["Devon Castillo","4429"],["Jordan Ellis","3312"],["Marcus Webb","2291"],["Sandra Okafor","6601"],["Amber Nguyen","7753"]].map(([name,pin])=>[
-              <span key={name+"-n"} style={{color:"#1e293b",fontWeight:600}}>{name}</span>,
-              <span key={name+"-p"} style={{color:"#3b82f6",fontFamily:"monospace",fontWeight:700}}>{pin}</span>
-            ])}
-          </div>
-          <div style={{borderTop:"1px solid #e2e8f0",marginTop:10,paddingTop:10,fontSize:11,color:"#64748b"}}>
-            <div>Leadership: <span style={{fontFamily:"monospace",fontWeight:700,color:"#1e293b"}}>demo2026</span></div>
-            <div>HR Portal: <span style={{fontFamily:"monospace",fontWeight:700,color:"#1e293b"}}>hr2026</span></div>
+    <div style={{...S.page,minHeight:"100vh"}}>
+      {/* Full-width yellow banner at very top */}
+      <div style={{background:"#f59e0b",color:"#1e293b",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:16}}>🎓</span>
+          <div>
+            <span style={{fontWeight:800,fontSize:13}}>ComplianceReady — Interactive Demo</span>
+            <span style={{fontSize:12,marginLeft:10,opacity:.8}}>Sample data only · Not a real facility</span>
           </div>
         </div>
-        <p style={{marginTop:12,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions</p>
+        <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#1e293b",color:"#fff",padding:"6px 16px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>📅 Book a Live Demo</a>
+      </div>
+
+      {/* Main content */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 48px)"}}>
+        <div style={{width:"100%",maxWidth:420,textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:8}}>🎓</div>
+          <h1 style={{margin:"0 0 4px",fontSize:24,fontWeight:800}}>SHYH Training Tracker</h1>
+          <p style={{margin:"0 0 20px",color:"#64748b",fontSize:14}}>Stay on top of annual training requirements</p>
+
+          {/* Cheat sheet — compact, right above buttons */}
+          <div style={{background:"#fefce8",border:"1px solid #fde68a",borderRadius:10,padding:"10px 14px",marginBottom:16,textAlign:"left"}}>
+            <div style={{fontWeight:700,fontSize:11,color:"#92400e",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>Demo Access Codes</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 12px",fontSize:12,marginBottom:8}}>
+              {[["Priya Nair","8847"],["Devon Castillo","4429"],["Jordan Ellis","3312"],["Marcus Webb","2291"],["Sandra Okafor","6601"],["Amber Nguyen","7753"]].map(([name,pin])=>[
+                <span key={name+"-n"} style={{color:"#1e293b",fontWeight:600}}>{name}</span>,
+                <span key={name+"-p"} style={{color:"#d97706",fontFamily:"monospace",fontWeight:800}}>{pin}</span>
+              ])}
+            </div>
+            <div style={{borderTop:"1px solid #fde68a",paddingTop:6,fontSize:11,color:"#92400e",display:"flex",gap:16,flexWrap:"wrap"}}>
+              <span>Leadership: <strong>demo2026</strong></span>
+              <span>HR Portal: <strong>hr2026</strong></span>
+            </div>
+          </div>
+
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
+            <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
+            <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, employee records</div></button>
+            <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
+          </div>
+          <p style={{marginTop:14,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions</p>
+        </div>
       </div>
     </div>
   );
