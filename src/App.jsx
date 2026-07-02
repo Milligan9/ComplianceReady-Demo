@@ -33,8 +33,10 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-const ADMIN_CODE = "60016001";
-const HR_CODE = "495272";
+const ADMIN_CODE = "demo2026";
+const DEMO_MODE = true;
+const CALENDLY_URL = "https://shorturl.at/2vqLa";
+const HR_CODE = "hr2026";
 const PASS_SCORE = 70;
 const CTYPES = ["Read and Acknowledge","Read and Quiz","Link","Certificate","Webinar"];
 const ALL_TAGS = ["Pre-Service","Annual","Required for Clearance","Acknowledgement","In-Service"];
@@ -3370,7 +3372,7 @@ function TrainingLibrary({library,employees,onRefresh,goBack,goHome}){
             {!isEditing&&<button style={{...S.btn("#64748b"),padding:"5px 10px",fontSize:12}} onClick={()=>startEdit(tr)}>⚙️ Edit</button>}
             {!isEditing&&<button style={{...S.btn("#475569"),padding:"5px 10px",fontSize:12}} onClick={()=>{setBulkCompleteModal(tr);setBulkEmps([]);setBulkDate(todayStr);setBulkInitials("");}}>✓ Bulk</button>}
             {!isEditing&&<button style={{...S.btn("#3b82f6"),padding:"5px 10px",fontSize:12}} onClick={()=>{setAssignModal(tr);setSelectedEmps([]);}}>👥</button>}
-            {!isEditing&&<button style={{...S.btn("#7f1d1d"),padding:"5px 8px",fontSize:12}} onClick={()=>handleRemove(tr.id,tr.name)}>✕</button>}
+            {!isEditing&&!DEMO_MODE&&<button style={{...S.btn("#7f1d1d"),padding:"5px 8px",fontSize:12}} onClick={()=>handleRemove(tr.id,tr.name)}>✕</button>}
             {isEditing&&<button style={S.btn("#3b82f6")} onClick={()=>saveEdit(tr)}>💾 Save</button>}
             {isEditing&&<button style={S.btn("#64748b")} onClick={()=>setEditing(null)}>Cancel</button>}
           </div>
@@ -4555,19 +4557,19 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
             {isHR&&<button style={S.btn("#3b82f6")} onClick={()=>setModal({type:"hrDocs"})}>📄 HR Docs</button>}
             <button style={S.btn("#dc2626")} onClick={()=>setModal({type:"writeups"})}>📋 Write-Ups</button>
             <button style={S.btn("#475569")} onClick={()=>setModal({type:"empFiles"})}>📁 Docs</button>
-            {isHR&&<button style={{...S.btn(emp.is_active===false?"#2563eb":"#475569"),fontSize:11,padding:"5px 10px"}} onClick={()=>setModal({type:"archive"})}>
+            {isHR&&DEMO_MODE&&<button style={{...S.btn("#94a3b8"),fontSize:11,padding:"5px 10px",cursor:"not-allowed"}} onClick={()=>toast("Not available in demo","warn")}>
               {emp.is_active===false?"↩ Reactivate":"Archive"}
             </button>}
             <button style={S.btn("#2563eb")} onClick={()=>setModal({type:"assign"})}>+ Training</button>
             {!cleared&&<button style={S.btn("#2563eb")} onClick={()=>setModal({type:"grantClearance"})}>✅ Grant Clearance</button>}
-            {cleared&&isHR&&<button style={S.btn("#dc2626")} onClick={()=>setModal({type:"revoke",selected:[]})}>⛔ Revoke Clearance</button>}
+            {cleared&&isHR&&!DEMO_MODE&&<button style={S.btn("#dc2626")} onClick={()=>setModal({type:"revoke",selected:[]})}>⛔ Revoke Clearance</button>}
             <button style={S.btn("#64748b")} onClick={()=>setModal({type:"bulkHours"})}>📁 Prior Hours</button>
-            {isHR&&<button style={S.btn("#475569")} onClick={()=>setModal({type:"reset"})}>🔄 Reset</button>}
+            {isHR&&!DEMO_MODE&&<button style={S.btn("#475569")} onClick={()=>setModal({type:"reset"})}>🔄 Reset</button>}
             <button style={S.btn("#3b82f6")} onClick={()=>setModal({type:"certs"})}>🏆 Certs ({empCerts.length+leaderGenCerts.length})</button>
             <select style={{...S.sel,background:"#64748b",color:"#fff",fontWeight:700,cursor:"pointer"}} onChange={e=>{const v=e.target.value;if(v==="ps")printComplianceReport(emp,"preservice");else if(v==="annual")printComplianceReport(emp,"annual");else if(v==="ack")printAcknowledgementReport(emp);else if(v==="all")printComplianceReport(emp,"all");e.target.value="";}}>
               <option value="">📊 Reports</option><option value="ps">Pre-Service</option><option value="annual">Annual</option><option value="ack">Acknowledgements</option><option value="all">Full Report</option>
             </select>
-            {isHR&&<button style={S.btn("#7f1d1d")} onClick={()=>handleDeleteEmp(emp.id,emp.name)}>Delete</button>}
+            {isHR&&DEMO_MODE&&<button style={{...S.btn("#94a3b8"),cursor:"not-allowed"}} onClick={()=>toast("Not available in demo","warn")}>Delete</button>}
           </>}/>
 
         <div style={{padding:16,maxWidth:940,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
@@ -4676,7 +4678,7 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
                     <button style={{...S.btn("#ffffff"),padding:"3px 7px",fontSize:11,border:"1px solid #cbd5e1"}} onClick={()=>setModal({type:"due",trId})}>📅</button>
                     <button style={{...S.btn("#475569"),padding:"3px 7px",fontSize:11}} onClick={()=>setModal({type:"reset",trId})}>🔄</button>
                     {st==="complete"?<button style={{...S.btn("#64748b"),padding:"3px 7px",fontSize:11}} onClick={()=>handleClearTraining(emp.id,trId,false)}>Undo</button>:<button style={{...S.btn("#2563eb"),padding:"3px 7px",fontSize:11}} onClick={()=>{setMarkDate(todayStr);setModal({type:"mark",trId});}}>✓ Done</button>}
-                    <button style={{...S.btn("#7f1d1d"),padding:"3px 6px",fontSize:11}} onClick={()=>setConfirm({msg:`Remove "${libTr.name}" from ${emp.name}?`,onYes:()=>{handleRemoveTraining(emp.id,trId);setConfirm(null);}})}>✕</button>
+                    DEMO_MODE?null:<button style={{...S.btn("#7f1d1d"),padding:"3px 6px",fontSize:11}} onClick={()=>setConfirm({msg:`Remove "${libTr.name}" from ${emp.name}?`,onYes:()=>{handleRemoveTraining(emp.id,trId);setConfirm(null);}})}>✕</button>
                   </div>
                 </div>
                 <div style={{fontSize:11,color:"#64748b",marginTop:5,display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
@@ -4851,6 +4853,12 @@ export default function App(){
   return(
     <div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{width:"100%",maxWidth:400,textAlign:"center"}}>
+        {/* Demo Banner */}
+        <div style={{background:"#2563eb",color:"#fff",borderRadius:10,padding:"10px 16px",marginBottom:20,border:"1px solid #1d4ed8"}}>
+          <div style={{fontWeight:800,fontSize:13,marginBottom:2}}>🎓 ComplianceReady — Interactive Demo</div>
+          <div style={{fontSize:11,opacity:.9,marginBottom:8}}>Explore the full platform. Data resets periodically.</div>
+          <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#fff",color:"#2563eb",padding:"5px 16px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none"}}>📅 Book a Live Demo</a>
+        </div>
         <div style={{fontSize:52,marginBottom:12}}>🎓</div>
         <h1 style={{margin:"0 0 6px",fontSize:24,fontWeight:800}}>SHYH Training Tracker</h1>
         <p style={{margin:"0 0 28px",color:"#64748b",fontSize:14}}>Stay on top of annual training requirements</p>
@@ -4858,7 +4866,20 @@ export default function App(){
           <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
           <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>           <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, employee records</div></button>           <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
         </div>
-        <p style={{marginTop:16,fontSize:11,color:"#94a3b8"}}>🌐 Connected to Supabase</p>
+        <div style={{...S.card,marginTop:20,textAlign:"left"}}>
+          <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Demo Employee Sign-In</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:"4px 16px",fontSize:12}}>
+            {[["Priya Nair","8847"],["Devon Castillo","4429"],["Jordan Ellis","3312"],["Marcus Webb","2291"],["Sandra Okafor","6601"],["Amber Nguyen","7753"]].map(([name,pin])=>[
+              <span key={name+"-n"} style={{color:"#1e293b",fontWeight:600}}>{name}</span>,
+              <span key={name+"-p"} style={{color:"#3b82f6",fontFamily:"monospace",fontWeight:700}}>{pin}</span>
+            ])}
+          </div>
+          <div style={{borderTop:"1px solid #e2e8f0",marginTop:10,paddingTop:10,fontSize:11,color:"#64748b"}}>
+            <div>Leadership: <span style={{fontFamily:"monospace",fontWeight:700,color:"#1e293b"}}>demo2026</span></div>
+            <div>HR Portal: <span style={{fontFamily:"monospace",fontWeight:700,color:"#1e293b"}}>hr2026</span></div>
+          </div>
+        </div>
+        <p style={{marginTop:12,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions</p>
       </div>
     </div>
   );
