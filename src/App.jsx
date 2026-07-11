@@ -46,7 +46,7 @@ const PIPELINE_STAGES = [
   { stage: 1, label: "Hired", color: "#64748b", bg: "#64748b18", desc: "Profile created" },
   { stage: 2, label: "HR Docs Submitted", color: "#3b82f6", bg: "#3b82f618", desc: "HR checklist complete, background cleared" },
   { stage: 3, label: "Provisionally Cleared", color: "#64748b", bg: "#64748b18", desc: "Required for Clearance complete — supervised work" },
-  { stage: 4, label: "Fully Cleared", color: "#2563eb", bg: "#2563eb18", desc: "Pre-Service complete — independent, counted in ratio" },
+  { stage: 4, label: "Fully Cleared", color: "#0e9e8e", bg: "#e1f5ee", desc: "Pre-Service complete — independent, counted in ratio" },
 ];
 
 const HR_DOC_CATEGORIES = ["Identity & Background", "Forms & Consents", "Other"];
@@ -587,7 +587,7 @@ function Bar({val,total,h=7}){
 }
 function HoursBar({completed,required}){
   const pct=required?Math.min(Math.round(completed/required*100),100):0;
-  const c=pct>=100?"#3b82f6":pct>60?"#64748b":"#f87171";
+  const c=pct>=100?"#0e9e8e":pct>60?"#64748b":"#f87171";
   return<div style={{display:"flex",alignItems:"center",gap:8}}>
     <div style={{flex:1,background:"#f8fafc",borderRadius:99,height:10,overflow:"hidden"}}>
       <div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/>
@@ -596,12 +596,12 @@ function HoursBar({completed,required}){
   </div>;
 }
 function ClearanceBadge({cleared,lockedSince}){
-  return<span style={{background:cleared?"#2563eb22":"#dc262622",color:cleared?"#3b82f6":"#f87171",border:`1px solid ${cleared?"#2563eb55":"#dc262655"}`,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
-    {cleared?`🔑 CLEARED${lockedSince?` since ${lockedSince}`:""}` :"⛔ NOT CLEARED"}
+  return<span style={{background:cleared?"#e1f5ee":"#fee2e2",color:cleared?"#0f6e56":"#dc2626",border:`1px solid ${cleared?"#5dcaa5":"#fca5a5"}`,padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
+    {cleared?`🔑 CLEARED${lockedSince?` since ${lockedSince}`:""}`:"⛔ NOT CLEARED"}
   </span>;
 }
 function NavBar({title,sub,onBack,onHome,extra}){
-  return<div style={{background:"#f1f5f9",borderBottom:"1px solid #cbd5e1",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,position:"sticky",top:0,zIndex:100}}>
+  return<div style={{background:"#f1f5f9",borderTop:"3px solid #0e9e8e",borderBottom:"1px solid #cbd5e1",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,position:"sticky",top:0,zIndex:100}}>
     <div style={{display:"flex",alignItems:"center",gap:8}}>
       {onBack&&<button style={S.btn("#64748b")} onClick={onBack}>← Back</button>}
       {onHome&&<button style={S.btn("#3b82f6")} onClick={onHome}>🏠 Home</button>}
@@ -1234,7 +1234,7 @@ function AuditorEmpDetail({emp, library, onBack, printIndividualReport, printAck
       </div>}
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
-        <div style={{background:cleared?'#dbeafe':'#fee2e2',border:`1px solid ${cleared?'#93c5fd':'#fca5a5'}`,borderRadius:10,padding:'12px 16px'}}>
+        <div style={{background:cleared?'#e1f5ee':'#fee2e2',border:`1px solid ${cleared?'#5dcaa5':'#fca5a5'}`,borderRadius:10,padding:'12px 16px'}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}><span style={{fontSize:20}}>{cleared?'✅':'⛔'}</span><div style={{fontWeight:700,fontSize:13,color:cleared?'#2563eb':'#dc2626'}}>{cleared?'CLEARED':'NOT CLEARED'}</div></div>
           {cleared&&lockedSince&&<div style={{fontSize:11,color:'#475569'}}>Locked since {lockedSince}</div>}
           {!cleared&&<div style={{fontSize:11,color:'#475569'}}>Missing: {missing.map(t=>t.name).join(', ')}</div>}
@@ -1242,7 +1242,7 @@ function AuditorEmpDetail({emp, library, onBack, printIndividualReport, printAck
         <div style={S.card}>
           <div style={{...S.lbl,marginBottom:4}}>Annual Hours · {emp.type}</div>
           <HoursBar completed={hrs} required={req}/>
-          <div style={{fontSize:11,color:hrs>=req?'#2563eb':'#64748b',marginTop:4}}>{hrs>=req?'✓ Requirement met':`${(req-hrs).toFixed(1)}h still needed`}</div>
+          <div style={{fontSize:11,color:hrs>=req?'#0f6e56':'#64748b',marginTop:4}}>{hrs>=req?'✓ Requirement met':`${(req-hrs).toFixed(1)}h still needed`}</div>
         </div>
       </div>
       <div style={{...S.card,marginBottom:12,display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}}>
@@ -3715,11 +3715,11 @@ function HRSummaryBanner({employees, library, printHRSummary}){
 
   const hasIssues = wuData.open>0||wuData.pending>0||wuData.warnings>0||docData.missing>0||pipeline12.length>0;
 
-  return<div style={{background:hasIssues?"#fef9c3":"#f0fdf9",border:`1px solid ${hasIssues?"#fde68a":"#bbf7d0"}`,borderRadius:10,marginBottom:14,overflow:"hidden"}}>
+  return<div style={{background:hasIssues?"#fef9c3":"#e1f5ee",border:`1px solid ${hasIssues?"#fde68a":"#5dcaa5"}`,borderRadius:10,marginBottom:14,overflow:"hidden"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",cursor:"pointer"}} onClick={()=>setOpen(p=>!p)}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <span style={{fontSize:16}}>📋</span>
-        <div style={{fontWeight:700,fontSize:13,color:hasIssues?"#92400e":"#166534"}}>
+        <div style={{fontWeight:700,fontSize:13,color:hasIssues?"#92400e":"#0f6e56"}}>
           HR & Compliance Overview
           {hasIssues?" — Action Items Pending":" — All Clear"}
         </div>
@@ -3767,7 +3767,7 @@ function ExecSummaryPanel({employees, library, onBack, goHome, printExecutiveSum
 
       {/* Top stats */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:10,marginBottom:20}}>
-        {statCard(`${cleared.length}/${employees.length}`,"✅ Staff Cleared",cleared.length===employees.length?"#2563eb":"#dc2626",cleared.length===employees.length?"#dbeafe":"#fee2e2")}
+        {statCard(`${cleared.length}/${employees.length}`,"✅ Staff Cleared",cleared.length===employees.length?"#0f6e56":"#dc2626",cleared.length===employees.length?"#e1f5ee":"#fee2e2")}
         {statCard(notCleared.length,"⛔ Not Cleared",notCleared.length>0?"#dc2626":"#16a34a",notCleared.length>0?"#fee2e2":"#f0fdf4")}
         {statCard(`${hoursMet.length}/${employees.length}`,"⏱️ Hours Met","#2563eb","#dbeafe")}
         {statCard(hoursBehind.length,"Hours Behind",hoursBehind.length>0?"#d97706":"#16a34a",hoursBehind.length>0?"#fef9c3":"#f0fdf4")}
@@ -5231,6 +5231,7 @@ export default function App(){
   );
   return(
     <div style={{...S.page,minHeight:"100vh"}}>
+      <div style={{height:4,background:"linear-gradient(90deg,#0e9e8e,#0f6e56)"}}/>
       <div style={{background:"#f59e0b",color:"#1e293b",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:16}}>🎓</span>
@@ -5256,9 +5257,9 @@ export default function App(){
               <span>HR & Compliance: <strong>hr2026</strong></span>
             </div>
           </div>
-          <button style={{width:"100%",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#1e293b",border:"none",borderRadius:12,padding:"16px 20px",fontSize:16,fontWeight:800,cursor:"pointer",marginBottom:10,boxShadow:"0 4px 20px rgba(245,158,11,0.35)",display:"flex",alignItems:"center",justifyContent:"center",gap:10}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
+          <button style={{width:"100%",background:"#0d1b2a",color:"#fff",border:"none",borderRadius:12,padding:"16px 20px",fontSize:16,fontWeight:800,cursor:"pointer",marginBottom:10,boxShadow:"0 4px 20px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",justifyContent:"center",gap:10}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
             <span style={{fontSize:20}}>🚀</span>
-            <div style={{textAlign:"left"}}><div>Start Demo Tour</div><div style={{fontSize:12,fontWeight:500,opacity:.8}}>Auto-login · Guided walkthrough · No code needed</div></div>
+            <div style={{textAlign:"left"}}><div>Start Demo Tour</div><div style={{fontSize:12,fontWeight:400,opacity:.65,marginTop:2}}>Auto-login · guided walkthrough · no code needed</div></div>
           </button>
           <div style={{display:"flex",alignItems:"center",gap:8,margin:"8px 0"}}>
             <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
