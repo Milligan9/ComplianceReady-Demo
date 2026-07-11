@@ -35,6 +35,7 @@ class ErrorBoundary extends React.Component {
 }
 const ADMIN_CODE = "demo2026";
 
+const HR_CODE = "hr2026";
 const DEMO_MODE = true;
 const CALENDLY_URL = "https://shorturl.at/2vqLa";
 
@@ -563,9 +564,9 @@ const S={
   btn:(bg="#3b82f6",full)=>({padding:"8px 16px",background:bg,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:13,width:full?"100%":"auto"}),
 };
 
-const ST_COLOR={complete:"#2563eb",overdue:"#dc2626",soon:"#d97706",pending:"#64748b"};
-const ST_BG={complete:"#dbeafe",overdue:"#fee2e2",soon:"#fef3c7",pending:"#f1f5f9"};
-const ST_BDR={complete:"#93c5fd",overdue:"#fca5a5",soon:"#fcd34d",pending:"#cbd5e1"};
+const ST_COLOR={complete:"#0e9e8e",overdue:"#dc2626",soon:"#d97706",pending:"#64748b"};
+const ST_BG={complete:"#e1f5ee",overdue:"#fee2e2",soon:"#fef3c7",pending:"#f1f5f9"};
+const ST_BDR={complete:"#5dcaa5",overdue:"#fca5a5",soon:"#fcd34d",pending:"#cbd5e1"};
 const ST_LBL={complete:"✓ Complete",overdue:"✗ Overdue",soon:"⚠ Due Soon",pending:"○ Pending"};
 const CT_COLOR={"Read and Acknowledge":"#2563eb","Read and Quiz":"#475569","Link":"#475569","Certificate":"#475569","Webinar":"#2563eb"};
 const CT_ICON={"Read and Acknowledge":"✍️","Read and Quiz":"📝","Link":"🔗","Certificate":"🏆","Webinar":"🖥️"};
@@ -605,7 +606,7 @@ function NavBar({title,sub,onBack,onHome,extra}){
     <div style={{display:"flex",alignItems:"center",gap:8}}>
       {onBack&&<button style={S.btn("#64748b")} onClick={onBack}>← Back</button>}
       {onHome&&<button style={S.btn("#3b82f6")} onClick={onHome}>🏠 Home</button>}
-      <div><div style={{fontWeight:700,fontSize:15}}>{title}</div>{sub&&<div style={{fontSize:11,color:"#64748b"}}>{sub}</div>}</div>
+      <div><div style={{fontWeight:700,fontSize:15,color:"#0e9e8e"}}>{title}</div>{sub&&<div style={{fontSize:11,color:"#64748b"}}>{sub}</div>}</div>
     </div>
     <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{extra}</div>
   </div>;
@@ -2146,11 +2147,11 @@ function EmpPortal({employees,library,onRefresh,goHome}){
 }
 
 // ── WRITE-UP CONSTANTS ────────────────────────────────────────────────────────
-const WU_TIERS = ["Coaching Note","Corrective Action","Termination Documentation"];
+const WU_TIERS = ["Coaching Note","Corrective Action","Performance Improvement Plan (PIP)","Written Warning","Final Warning","Termination Documentation"];
 const WU_CATEGORIES = ["Attendance","Performance","Policy Violation","Conduct","Safety","Other"];
 const WU_AREAS_OF_CONCERN = ["Youth Safety","Supervision Ratio","Documentation/Records","Medication Administration","Behavior Management","Boundaries/Professionalism","Punctuality/Attendance","Communication","Policy Compliance","Licensing/Regulatory","Other"];
 const WU_ACTIONS = ["No Action — Documentation Only","Verbal Counseling","Written Warning","Performance Improvement Plan (PIP)","Additional Training Required","Removal from Shift","Suspension — With Pay","Suspension — Without Pay","Demotion","Termination","Other"];
-const WU_TIER_COLOR = {"Coaching Note":"#3b82f6","Corrective Action":"#64748b","Termination Documentation":"#dc2626"}; const WU_REPORTABLE_TYPES = ["Abuse / Neglect Allegation","Runaway / Missing Child","Serious Injury","Restraint / Emergency Behavior Intervention","Medication Error","Property Damage","Law Enforcement Involvement","Suicide Attempt / Self-Harm","Other Reportable Event"];
+const WU_TIER_COLOR = {"Coaching Note":"#3b82f6","Corrective Action":"#64748b","Performance Improvement Plan (PIP)":"#d97706","Written Warning":"#dc2626","Final Warning":"#991b1b","Termination Documentation":"#7f1d1d"}; const WU_REPORTABLE_TYPES = ["Abuse / Neglect Allegation","Runaway / Missing Child","Serious Injury","Restraint / Emergency Behavior Intervention","Medication Error","Property Damage","Law Enforcement Involvement","Suicide Attempt / Self-Harm","Other Reportable Event"];
 
 function printWriteUp(wu, empName) {
   const tierColor = WU_TIER_COLOR[wu.tier] || "#94a3b8";
@@ -2213,6 +2214,8 @@ const WU_PROMPTS = {
 };
 function WriteUpModal({emp, wu, onClose, onSaved, toast}){
   const isNew = !wu?.id;
+  const wasAcknowledged = wu?.acknowledged_at && wu?.status === "acknowledged";
+  const [ackResetConfirm, setAckResetConfirm] = useState(false);
   const [form, setForm] = useState({
     tier: wu?.tier || "Coaching Note",
     category: wu?.category || "Attendance",
@@ -2223,6 +2226,8 @@ function WriteUpModal({emp, wu, onClose, onSaved, toast}){
     action_taken: wu?.action_taken || "",
     coaching_notes: wu?.coaching_notes || "",
     improvement_plan: wu?.improvement_plan || "",
+    pip_duration: wu?.pip_duration || "30 days",
+    pip_goals: wu?.pip_goals || "",
     reportable_event: wu?.reportable_event || "",
     followup_date: wu?.followup_date || "",
     created_by: wu?.created_by || "",
@@ -2235,6 +2240,22 @@ function WriteUpModal({emp, wu, onClose, onSaved, toast}){
   const fileInputRef = useRef(null);
   const prompts = WU_PROMPTS[form.tier] || WU_PROMPTS["Coaching Note"];
   const tierColor = WU_TIER_COLOR[form.tier]||"#94a3b8";
+  const isPIP = form.tier === "Performance Improvement Plan (PIP)";
+
+  // If editing an acknowledged write-up, require confirmation first
+  if(!isNew && wasAcknowledged && !ackResetConfirm) return(
+    <div style={{position:"fixed",inset:0,background:"#000d",display:"flex",alignItems:"center",justifyContent:"center",zIndex:600,padding:16}}>
+      <div style={{...S.card,maxWidth:420,width:"100%"}}>
+        <div style={{fontSize:36,textAlign:"center",marginBottom:12}}>⚠️</div>
+        <h3 style={{margin:"0 0 8px",fontSize:15,fontWeight:700,textAlign:"center"}}>This write-up has been acknowledged</h3>
+        <p style={{fontSize:13,color:"#475569",lineHeight:1.6,marginBottom:16,textAlign:"center"}}>Editing it will reset the employee's acknowledgement — they will need to re-sign. Their original response will be preserved and they can add to it.</p>
+        <div style={{display:"flex",gap:8}}>
+          <button style={S.btn("#dc2626",true)} onClick={()=>setAckResetConfirm(true)}>Edit & Reset Acknowledgement</button>
+          <button style={S.btn("#64748b")} onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
 
   async function handleSave(deliver=false){
     if(!form.description.trim()){toast("Description required","error");return;}
@@ -2247,18 +2268,23 @@ function WriteUpModal({emp, wu, onClose, onSaved, toast}){
           attachment_path=uploaded.path;attachment_name=uploaded.name;
         }catch(upErr){toast(`File attached locally but upload failed: ${upErr.message}`,"warn");}
       }
+      // If was acknowledged and we're editing — reset acknowledgement, preserve response
+      const resetAck = wasAcknowledged && ackResetConfirm;
       const payload = {
         ...form,
         attachment_path, attachment_name,
+        pip_duration: isPIP ? form.pip_duration : "",
+        pip_goals: isPIP ? form.pip_goals : "",
         id: wu?.id,
         employee_id: emp.id,
-        status: deliver ? "delivered" : form.status,
-        delivered_at: deliver ? todayStr : (wu?.delivered_at||""),
-        acknowledged_at: wu?.acknowledged_at||"",
-        employee_response: wu?.employee_response||"",
+        status: resetAck ? "delivered" : (deliver ? "delivered" : form.status),
+        delivered_at: (resetAck || deliver) ? todayStr : (wu?.delivered_at||""),
+        acknowledged_at: resetAck ? "" : (wu?.acknowledged_at||""),
+        employee_response: wu?.employee_response||"", // always preserve
       };
       await saveWriteUp(payload);
-      toast(deliver ? "Write-up delivered to employee ✓" : "Write-up saved ✓", "success");
+      if(resetAck) toast("Write-up updated — employee must re-acknowledge ✓","warn");
+      else toast(deliver ? "Write-up delivered to employee ✓" : "Write-up saved ✓", "success");
       if(onSaved)await onSaved();
       onClose();
     }catch(e){toast(`Could not save: ${e.message}`,"error");}
@@ -2329,11 +2355,37 @@ function WriteUpModal({emp, wu, onClose, onSaved, toast}){
       <textarea style={{...S.inp,minHeight:90,resize:"vertical"}} value={form.improvement_plan} onChange={e=>setForm(p=>({...p,improvement_plan:e.target.value}))} placeholder={prompts.improvement_plan.placeholder}/>
     </div>
 
+    {/* PIP-specific fields */}
+    {isPIP&&<div style={{marginBottom:14,background:"#fef9c3",border:"1px solid #fde68a",borderRadius:8,padding:12}}>
+      <div style={{fontWeight:700,fontSize:12,color:"#92400e",marginBottom:8}}>📋 Performance Improvement Plan Details</div>
+      <div style={{display:"flex",gap:10,marginBottom:8,flexWrap:"wrap"}}>
+        <div style={{flex:"0 0 180px"}}>
+          <label style={S.lbl}>PIP Duration</label>
+          <select style={{...S.sel,width:"100%"}} value={form.pip_duration} onChange={e=>setForm(p=>({...p,pip_duration:e.target.value}))}>
+            {["30 days","60 days","90 days","6 months"].map(d=><option key={d}>{d}</option>)}
+          </select>
+        </div>
+        <div style={{flex:1,minWidth:200}}>
+          <label style={S.lbl}>End Date</label>
+          <div style={{fontSize:12,color:"#64748b",padding:"8px 10px",background:"#fff",border:"1px solid #e2e8f0",borderRadius:6}}>
+            {form.incident_date ? (() => {
+              const d = new Date(form.incident_date);
+              const days = parseInt(form.pip_duration)||30;
+              d.setDate(d.getDate() + days);
+              return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+            })() : "Set incident date first"}
+          </div>
+        </div>
+      </div>
+      <label style={S.lbl}>Goals & Success Metrics</label>
+      <textarea style={{...S.inp,minHeight:80,resize:"vertical"}} value={form.pip_goals} onChange={e=>setForm(p=>({...p,pip_goals:e.target.value}))} placeholder="Define specific, measurable goals the employee must achieve to successfully complete this PIP. Include metrics, deadlines, and check-in schedule…"/>
+    </div>}
+
     {/* Employee response if exists */}
-    {wu?.employee_response&&<div style={{marginBottom:14,background:"#f8fafc11",border:"1px solid #64748b44",borderRadius:8,padding:12}}>
-      <div style={{...S.lbl,color:"#64748b",marginBottom:4}}>Employee Statement</div>
+    {wu?.employee_response&&<div style={{marginBottom:14,background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:8,padding:12}}>
+      <div style={{...S.lbl,color:"#475569",marginBottom:4}}>Employee Statement (preserved)</div>
       <div style={{fontSize:13,color:"#1e293b",whiteSpace:"pre-wrap"}}>{wu.employee_response}</div>
-      {wu.acknowledged_at&&<div style={{fontSize:11,color:"#64748b",marginTop:4}}>Acknowledged: {wu.acknowledged_at}</div>}
+      {wu.acknowledged_at&&<div style={{fontSize:11,color:"#64748b",marginTop:4}}>Originally acknowledged: {wu.acknowledged_at}</div>}
     </div>}
 
     <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -2545,6 +2597,30 @@ function PipelinePanel({employees, library, onRefresh, onBack, goHome}){
     setConfirmModal(null);
   }
 
+  async function handleAdvanceToStage3(emp) {
+    try {
+      try { await updatePipelineStage(emp.id, 3, emp.pipeline_flags || {}); }
+      catch { await supabase.from('employees').update({pipeline_stage:3,pipeline_flags:emp.pipeline_flags||{}}).eq('id',emp.id); }
+      await onRefresh();
+      toast(`${emp.name} advanced to Provisionally Cleared ✓`, "success");
+    } catch(e) { toast(`Error: ${e.message}`, "error"); }
+    setConfirmModal(null);
+  }
+
+  async function handleMoveBack(emp) {
+    const prevStage = Math.max(1, (emp.pipeline_stage||1) - 1);
+    try {
+      const update = {pipeline_stage: prevStage, pipeline_flags: emp.pipeline_flags||{}};
+      if(prevStage < 4) update.fully_cleared_at = null;
+      try { await supabase.from('employees').update(update).eq('id',emp.id); }
+      catch(e2) { throw e2; }
+      await onRefresh();
+      const labels = ['','Hired','HR Docs Submitted','Provisionally Cleared','Fully Cleared'];
+      toast(`${emp.name} moved back to ${labels[prevStage]}`, "warn");
+    } catch(e) { toast(`Error: ${e.message}`, "error"); }
+    setConfirmModal(null);
+  }
+
   async function handleFlagBackground(emp) {
     try {
       const flags = { ...(emp.pipeline_flags || {}), backgroundIssue: true };
@@ -2607,10 +2683,14 @@ function PipelinePanel({employees, library, onRefresh, onBack, goHome}){
         <span>🔰 {psDone}/{psTrainings.length} pre-service</span>
       </div>
 
-      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
         {stage===1&&<button style={{...S.btn("#3b82f6"),fontSize:11,padding:"4px 10px"}}
           onClick={()=>setConfirmModal({type:"advance2",emp:e})}>
           Mark HR Docs Submitted →
+        </button>}
+        {stage===2&&!flagged&&<button style={{...S.btn("#0e9e8e"),fontSize:11,padding:"4px 10px"}}
+          onClick={()=>setConfirmModal({type:"advance3",emp:e})}>
+          → Mark Provisionally Cleared
         </button>}
         {stage===2&&!flagged&&<button style={{...S.btn("#dc2626"),fontSize:11,padding:"4px 10px"}}
           onClick={()=>setConfirmModal({type:"flag",emp:e})}>
@@ -2626,11 +2706,15 @@ function PipelinePanel({employees, library, onRefresh, onBack, goHome}){
           }}>
           Clear Flag
         </button>}
-        {stage===3&&<button style={{...S.btn("#2563eb"),fontSize:11,padding:"4px 10px"}}
+        {stage===3&&<button style={{...S.btn("#0e9e8e"),fontSize:11,padding:"4px 10px"}}
           onClick={()=>setConfirmModal({type:"fullClear",emp:e})}>
           ✅ Grant Full Clearance
         </button>}
-        {stage===4&&<span style={{fontSize:11,color:"#3b82f6",fontWeight:700}}>✅ Fully Cleared {e.fully_cleared_at}</span>}
+        {stage===4&&<span style={{fontSize:11,color:"#0e9e8e",fontWeight:700}}>✅ Fully Cleared {e.fully_cleared_at}</span>}
+        {stage>1&&isHR&&<button style={{...S.btn("#475569"),fontSize:10,padding:"3px 8px",marginLeft:"auto"}}
+          onClick={()=>setConfirmModal({type:"moveBack",emp:e})}>
+          ← Move Back
+        </button>}
       </div>
     </div>;
   }
@@ -2682,7 +2766,16 @@ function PipelinePanel({employees, library, onRefresh, onBack, goHome}){
       yesLabel="Yes, advance" yesColor="#3b82f6"
       onYes={()=>handleAdvanceToStage2(confirmModal.emp)}
       onNo={()=>setConfirmModal(null)}/>}
-    {confirmModal?.type==="flag"&&<Confirm
+    {confirmModal?.type==="advance3"&&<Confirm
+      msg={`Mark ${confirmModal.emp.name} as Provisionally Cleared? They will be able to work under supervision.`}
+      yesLabel="Yes, advance" yesColor="#0e9e8e"
+      onYes={()=>handleAdvanceToStage3(confirmModal.emp)}
+      onNo={()=>setConfirmModal(null)}/>}
+    {confirmModal?.type==="moveBack"&&<Confirm
+      msg={`Move ${confirmModal.emp.name} back one pipeline stage? This will undo their current stage. HR action only.`}
+      yesLabel="Yes, move back" yesColor="#dc2626"
+      onYes={()=>handleMoveBack(confirmModal.emp)}
+      onNo={()=>setConfirmModal(null)}/>}    {confirmModal?.type==="flag"&&<Confirm
       msg={`Flag ${confirmModal.emp.name} for a background issue? This will stop pipeline advancement until reviewed.`}
       yesLabel="Flag" yesColor="#dc2626"
       onYes={()=>handleFlagBackground(confirmModal.emp)}
@@ -5208,7 +5301,7 @@ export default function App(){
     else setCodeErr("Incorrect code. Please try again.");
   }
 
-  if(loading)return<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🎓</div><div style={{fontSize:16,color:"#64748b"}}>Loading SHYH Training Tracker…</div></div></div>;
+  if(loading)return<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🎓</div><div style={{fontSize:16,color:"#64748b"}}>Loading Southall Heritage Youth Home…</div></div></div>;
   const tourOverlay=tourStep>=0?<DemoTourOverlay step={tourStep} onNext={()=>setTourStep(p=>p+1)} onClose={()=>setTourStep(-1)}/>:null;
   if(screen==="auditor"&&auditorSession)return<ErrorBoundary><><AuditorDashboard employees={employees} library={library} session={auditorSession} onSignOut={()=>{setAuditorSession(null);setScreen("home");}}/>{DEMO_MODE&&<DemoContextHelp portal="auditor"/>}</></ErrorBoundary>;   if(screen==="auditor-login")return(<AuditorLoginScreen onSuccess={(session)=>{setAuditorSession(session);setScreen("auditor");}} goHome={goHome}/>);   if(screen==="hr-login")return(<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><div style={{width:"100%",maxWidth:360}}><div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>📋</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>HR Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the HR code to continue</p></div><div style={S.card}><label style={S.lbl}>HR Code</label><input style={{...S.inp,marginBottom:10}} type="password" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryHR()} placeholder="Enter HR code"/>{codeErr&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{codeErr}</div>}<button style={S.btn("#dc2626",true)} onClick={tryHR}>Enter HR Portal</button><button style={{...S.btn("#64748b",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button></div></div></div>);   if(screen==="employee")return<ErrorBoundary><><EmpPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome}/>{DEMO_MODE&&<DemoContextHelp portal="employee"/>}</></ErrorBoundary>;
   if(screen==="admin"){
@@ -5254,7 +5347,7 @@ export default function App(){
           {/* LEFT column */}
           <div style={{flex:"1 1 320px",minWidth:260}}>
             <div style={{textAlign:"center",marginBottom:18}}>
-              <div style={{fontSize:15,fontWeight:800,color:"#0d1b2a"}}>SHYH Training Tracker</div>
+              <div style={{fontSize:15,fontWeight:800,color:"#0d1b2a"}}>Southall Heritage Youth Home</div>
               <div style={{fontSize:12,color:"#64748b",marginTop:2}}>Select a portal or start the guided tour</div>
             </div>
             <button style={{width:"100%",background:"#0d1b2a",color:"#fff",border:"2px solid #0e9e8e",borderRadius:12,padding:"18px 20px",fontSize:15,fontWeight:800,cursor:"pointer",marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,0.18)",display:"flex",alignItems:"center",justifyContent:"center",gap:12}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
