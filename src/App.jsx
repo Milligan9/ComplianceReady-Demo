@@ -34,138 +34,9 @@ class ErrorBoundary extends React.Component {
   }
 }
 const ADMIN_CODE = "demo2026";
+
 const DEMO_MODE = true;
 const CALENDLY_URL = "https://shorturl.at/2vqLa";
-const HR_CODE = "hr2026";
-
-// ── DEMO TOUR COMPONENT ────────────────────────────────────────────────────────
-const TOUR_STEPS = [
-  {
-    id: 1,
-    icon: "🛡️",
-    title: "Leadership Dashboard",
-    desc: "You're in! This is what your admin sees every day — staff clearance, overdue trainings, hours, and compliance at a glance.",
-    hint: "👇 Find Marcus Webb — he has overdue trainings and a Written Warning",
-    color: "#3b82f6",
-  },
-  {
-    id: 2,
-    icon: "👤",
-    title: "Employee Detail View",
-    desc: "Click any employee card to see their full training record, clearance status, hours, certificates, and documentation.",
-    hint: "👇 Look at the Write-Ups button — Devon has a coaching note on file",
-    color: "#3b82f6",
-  },
-  {
-    id: 3,
-    icon: "📋",
-    title: "HR Portal",
-    desc: "The HR Portal has separate access for sensitive actions — write-ups, employee files, HR docs, and corrective actions.",
-    hint: "Go back home → Enter code: hr2026",
-    color: "#dc2626",
-  },
-  {
-    id: 4,
-    icon: "🔍",
-    title: "Auditor / Licensing Access",
-    desc: "Generate a temporary read-only code for DFPS inspectors. They see training records and compliance reports — nothing else.",
-    hint: "Go back home → Auditor / Licensing Access",
-    color: "#475569",
-  },
-  {
-    id: 5,
-    icon: "👤",
-    title: "Employee Portal",
-    desc: "Staff log in with just a PIN — no username needed. They see their own trainings, hours, clearance status, and write-ups.",
-    hint: "Try PIN 8847 (Priya Nair) or 2291 (Marcus Webb)",
-    color: "#2563eb",
-  },
-];
-
-function DemoTourOverlay({step, onNext, onClose}){
-  const s = TOUR_STEPS[step];
-  if(!s) return null;
-  const isLast = step === TOUR_STEPS.length - 1;
-  return(
-    <div style={{position:"fixed",bottom:20,right:20,zIndex:9999,maxWidth:320,width:"calc(100% - 40px)"}}>
-      <div style={{background:"#1e293b",borderRadius:14,padding:18,boxShadow:"0 8px 40px rgba(0,0,0,0.4)",border:`2px solid ${s.color}44`}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:20}}>{s.icon}</span>
-            <div>
-              <div style={{fontSize:10,fontWeight:700,color:s.color,textTransform:"uppercase",letterSpacing:.5}}>Demo Tour · Step {step+1} of {TOUR_STEPS.length}</div>
-              <div style={{fontSize:14,fontWeight:700,color:"#fff",marginTop:1}}>{s.title}</div>
-            </div>
-          </div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:18,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>✕</button>
-        </div>
-        <p style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,margin:"0 0 10px"}}>{s.desc}</p>
-        <div style={{background:"rgba(255,255,255,0.06)",borderRadius:8,padding:"8px 10px",marginBottom:12,fontSize:12,color:s.color,fontWeight:600}}>{s.hint}</div>
-        <div style={{display:"flex",gap:8}}>
-          {!isLast&&<button onClick={onNext} style={{flex:1,background:s.color,color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>Next Tip →</button>}
-          {isLast&&<button onClick={onClose} style={{flex:1,background:"#3b82f6",color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Got It!</button>}
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.5)",border:"none",borderRadius:8,padding:"9px 14px",fontSize:12,cursor:"pointer"}}>Skip</button>
-        </div>
-        {/* Progress dots */}
-        <div style={{display:"flex",gap:4,justifyContent:"center",marginTop:10}}>
-          {TOUR_STEPS.map((_,i)=><div key={i} style={{width:i===step?16:6,height:6,borderRadius:99,background:i===step?s.color:"rgba(255,255,255,0.2)",transition:"all 0.3s"}}/>)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DemoContextHelp({portal}){
-  const [open,setOpen]=useState(false);
-  const tips = {
-    leadership:[
-      {icon:"👀",text:"Click Marcus Webb — overdue trainings + Written Warning"},
-      {icon:"👀",text:"Click Devon Castillo — coaching note on file, almost cleared"},
-      {icon:"📊",text:"Try Group Reports to print a compliance summary"},
-      {icon:"🔄",text:"Click Pipeline to see the hire-to-clearance tracker"},
-      {icon:"🔍",text:"Try Auditor button to create a temporary inspector code"},
-      {icon:"📚",text:"Try Library to see the full training catalog"},
-    ],
-    hr:[
-      {icon:"📋",text:"Click Marcus Webb → Write-Ups to see his Written Warning"},
-      {icon:"📋",text:"Click Devon Castillo → Write-Ups to see his Coaching Note"},
-      {icon:"📁",text:"Click HR Docs on any employee to see the checklist"},
-      {icon:"📁",text:"Marcus is missing 2 HR documents — Driver License + TB Test"},
-      {icon:"➕",text:"Try creating a new Write-Up on any employee"},
-    ],
-    employee:[
-      {icon:"✅",text:"Try PIN 8847 (Priya Nair) — fully cleared, all done"},
-      {icon:"🚨",text:"Try PIN 2291 (Marcus Webb) — overdue trainings, has a write-up"},
-      {icon:"🔶",text:"Try PIN 4429 (Devon Castillo) — provisionally cleared"},
-      {icon:"📄",text:"Check the My Documents tab to see a delivered write-up"},
-      {icon:"🎓",text:"Check Certificates tab — Priya has 3 generated certs"},
-    ],
-    auditor:[
-      {icon:"👁️",text:"Click any employee to see their full training record"},
-      {icon:"🖨️",text:"Use Print Record to generate a DFPS-ready report"},
-      {icon:"✍️",text:"Use Print Ack to see signed acknowledgements"},
-      {icon:"🎓",text:"Use Certs button to view generated certificates"},
-    ],
-  };
-  const list = tips[portal]||[];
-  return(
-    <div style={{position:"fixed",bottom:20,right:20,zIndex:9000}}>
-      {open&&<div style={{background:"#1e293b",borderRadius:14,padding:16,marginBottom:10,maxWidth:280,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.1)"}}>
-        <div style={{fontSize:11,fontWeight:700,color:"#f59e0b",textTransform:"uppercase",letterSpacing:.5,marginBottom:10}}>Try These in {portal.charAt(0).toUpperCase()+portal.slice(1)}</div>
-        {list.map((t,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"6px 0",borderBottom:i<list.length-1?"1px solid rgba(255,255,255,0.06)":"none"}}>
-          <span style={{fontSize:13,flexShrink:0}}>{t.icon}</span>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.5}}>{t.text}</span>
-        </div>)}
-        <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"block",marginTop:12,background:"#f59e0b",color:"#1e293b",borderRadius:8,padding:"8px 0",fontSize:12,fontWeight:700,textAlign:"center",textDecoration:"none"}}>📅 Book a Live Demo</a>
-      </div>}
-      <button onClick={()=>setOpen(p=>!p)} style={{width:48,height:48,borderRadius:50,background:open?"#1e293b":"#f59e0b",color:open?"#fff":"#1e293b",border:"none",fontSize:20,fontWeight:900,cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
-        {open?"✕":"?"}
-      </button>
-    </div>
-  );
-}
-
-// ── END DEMO COMPONENTS ────────────────────────────────────────────────────────
 
 const PASS_SCORE = 70;
 const CTYPES = ["Read and Acknowledge","Read and Quiz","Link","Certificate","Webinar"];
@@ -3714,6 +3585,242 @@ function TrainingLibrary({library,employees,onRefresh,goBack,goHome}){
     </div>
   );
 }
+
+// ── DEMO TOUR COMPONENT ────────────────────────────────────────────────────────
+const TOUR_STEPS = [
+  {id:1,icon:"🛡️",title:"Admin Dashboard",desc:"You're in! This is what your admin sees every day — staff clearance, overdue trainings, hours, and compliance at a glance.",hint:"👇 Find Marcus Webb — he has overdue trainings and a Written Warning",color:"#3b82f6"},
+  {id:2,icon:"📊",title:"Executive Summary",desc:"Click the Summary tab in the nav bar to see a facility-wide compliance overview — clearance, hours, risk flags, and pipeline — all on one page.",hint:"👆 Click 📊 Summary in the top nav bar",color:"#3b82f6"},
+  {id:3,icon:"👤",title:"Employee Detail View",desc:"Click any employee card to see their full training record, clearance status, hours, certificates, and documentation.",hint:"👇 Click Devon Castillo to see a coaching note on file",color:"#3b82f6"},
+  {id:4,icon:"📋",title:"HR & Compliance Portal",desc:"The HR portal has separate access for sensitive actions — write-ups, employee files, HR docs, corrective actions, and an HR summary dashboard.",hint:"Go back home → Enter code: hr2026",color:"#dc2626"},
+  {id:5,icon:"🔍",title:"Auditor / Licensing Access",desc:"Generate a temporary read-only code for DFPS inspectors. They see training records and compliance reports — nothing else, auto-expires.",hint:"Go back home → Auditor / Licensing Access",color:"#475569"},
+  {id:6,icon:"👤",title:"Employee Portal",desc:"Staff log in with just a PIN — no username needed. They see their own trainings, hours, clearance status, and any delivered write-ups.",hint:"Try PIN 8847 (Priya Nair) or 2291 (Marcus Webb)",color:"#2563eb"},
+];
+
+function DemoTourOverlay({step,onNext,onClose}){
+  const s=TOUR_STEPS[step];if(!s)return null;
+  const isLast=step===TOUR_STEPS.length-1;
+  return(
+    <div style={{position:"fixed",bottom:20,right:20,zIndex:9999,maxWidth:320,width:"calc(100% - 40px)"}}>
+      <div style={{background:"#1e293b",borderRadius:14,padding:18,boxShadow:"0 8px 40px rgba(0,0,0,0.4)",border:`2px solid ${s.color}44`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:20}}>{s.icon}</span>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,color:s.color,textTransform:"uppercase",letterSpacing:.5}}>Demo Tour · Step {step+1} of {TOUR_STEPS.length}</div>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff",marginTop:1}}>{s.title}</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:18,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>✕</button>
+        </div>
+        <p style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,margin:"0 0 10px"}}>{s.desc}</p>
+        <div style={{background:"rgba(255,255,255,0.06)",borderRadius:8,padding:"8px 10px",marginBottom:12,fontSize:12,color:s.color,fontWeight:600}}>{s.hint}</div>
+        <div style={{display:"flex",gap:8}}>
+          {!isLast&&<button onClick={onNext} style={{flex:1,background:s.color,color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>Next Tip →</button>}
+          {isLast&&<button onClick={onClose} style={{flex:1,background:"#3b82f6",color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Got It!</button>}
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.5)",border:"none",borderRadius:8,padding:"9px 14px",fontSize:12,cursor:"pointer"}}>Skip</button>
+        </div>
+        <div style={{display:"flex",gap:4,justifyContent:"center",marginTop:10}}>
+          {TOUR_STEPS.map((_,i)=><div key={i} style={{width:i===step?16:6,height:6,borderRadius:99,background:i===step?s.color:"rgba(255,255,255,0.2)",transition:"all 0.3s"}}/>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoContextHelp({portal}){
+  const [open,setOpen]=useState(false);
+  const tips={
+    leadership:[
+      {icon:"📊",text:"Click Summary tab to see Executive Compliance Overview"},
+      {icon:"👀",text:"Click Marcus Webb — overdue trainings + Written Warning"},
+      {icon:"👀",text:"Click Devon Castillo — coaching note, almost cleared"},
+      {icon:"📊",text:"Try Group Reports → Executive Summary to print"},
+      {icon:"🔄",text:"Click Pipeline to see the hire-to-clearance tracker"},
+      {icon:"🔍",text:"Try Auditor button to create a temporary inspector code"},
+    ],
+    hr:[
+      {icon:"📊",text:"See the HR summary banner above for action items"},
+      {icon:"📋",text:"Click Marcus Webb → Write-Ups to see his Written Warning"},
+      {icon:"📋",text:"Click Devon Castillo → Write-Ups to see his Coaching Note"},
+      {icon:"📁",text:"Click HR Docs on any employee to see the checklist"},
+      {icon:"🖨️",text:"Print HR Summary from the banner or Group Reports"},
+    ],
+    employee:[
+      {icon:"✅",text:"Try PIN 8847 (Priya Nair) — fully cleared, all done"},
+      {icon:"🚨",text:"Try PIN 2291 (Marcus Webb) — overdue trainings, write-up"},
+      {icon:"🔶",text:"Try PIN 4429 (Devon Castillo) — provisionally cleared"},
+      {icon:"📄",text:"Check My Documents tab to see a delivered write-up"},
+      {icon:"🎓",text:"Check Certificates — Priya has 3 generated certs"},
+    ],
+    auditor:[
+      {icon:"👁️",text:"Click any employee to see their full training record"},
+      {icon:"🖨️",text:"Use Print Record for a DFPS-ready compliance report"},
+      {icon:"✍️",text:"Use Print Ack to see signed acknowledgements"},
+      {icon:"🎓",text:"Use Certs button to view generated certificates"},
+    ],
+  };
+  const list=tips[portal]||[];
+  return(
+    <div style={{position:"fixed",bottom:20,right:20,zIndex:9000}}>
+      {open&&<div style={{background:"#1e293b",borderRadius:14,padding:16,marginBottom:10,maxWidth:280,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#f59e0b",textTransform:"uppercase",letterSpacing:.5,marginBottom:10}}>Try These in {portal.charAt(0).toUpperCase()+portal.slice(1)}</div>
+        {list.map((t,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"6px 0",borderBottom:i<list.length-1?"1px solid rgba(255,255,255,0.06)":"none"}}>
+          <span style={{fontSize:13,flexShrink:0}}>{t.icon}</span>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.5}}>{t.text}</span>
+        </div>)}
+        <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"block",marginTop:12,background:"#f59e0b",color:"#1e293b",borderRadius:8,padding:"8px 0",fontSize:12,fontWeight:700,textAlign:"center",textDecoration:"none"}}>📅 Book a Live Demo</a>
+      </div>}
+      <button onClick={()=>setOpen(p=>!p)} style={{width:48,height:48,borderRadius:50,background:open?"#1e293b":"#f59e0b",color:open?"#fff":"#1e293b",border:"none",fontSize:20,fontWeight:900,cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
+        {open?"✕":"?"}
+      </button>
+    </div>
+  );
+}
+
+// ── DEMO PULSE ANIMATION ───────────────────────────────────────────────────────
+if(typeof document!=="undefined"&&DEMO_MODE){
+  const style=document.createElement("style");
+  style.textContent=`@keyframes demoPulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,0.7);}70%{box-shadow:0 0 0 8px rgba(245,158,11,0);}100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}}`;
+  document.head.appendChild(style);
+}
+
+// ── END DEMO COMPONENTS ────────────────────────────────────────────────────────
+
+// ── HR SUMMARY BANNER ─────────────────────────────────────────────────────────
+function HRSummaryBanner({employees, library, printHRSummary}){
+  const [open, setOpen] = useState(true);
+  const [wuData, setWuData] = useState({open:0,pending:0,warnings:0});
+  const [docData, setDocData] = useState({missing:0});
+  const [loaded, setLoaded] = useState(false);
+  const pipeline12 = employees.filter(e=>(e.pipeline_stage||1)<=2);
+
+  useEffect(()=>{
+    async function load(){
+      try{
+        const wuResults = await Promise.all(employees.map(e=>getWriteUps(e.id)));
+        const allWus = wuResults.flat();
+        const docResults = await Promise.all(employees.map(e=>getHrDocuments(e.id)));
+        const allDocs = docResults.flat();
+        setWuData({
+          open: allWus.filter(w=>w.status==='draft').length,
+          pending: allWus.filter(w=>w.status==='delivered').length,
+          warnings: allWus.filter(w=>w.tier==='Written Warning'||w.tier==='Final Warning').length,
+        });
+        setDocData({missing: allDocs.filter(d=>!d.submitted).length});
+        setLoaded(true);
+      }catch(e){console.error(e);}
+    }
+    load();
+  },[employees.length]);
+
+  const hasIssues = wuData.open>0||wuData.pending>0||wuData.warnings>0||docData.missing>0||pipeline12.length>0;
+
+  return<div style={{background:hasIssues?"#fef9c3":"#f0fdf9",border:`1px solid ${hasIssues?"#fde68a":"#bbf7d0"}`,borderRadius:10,marginBottom:14,overflow:"hidden"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",cursor:"pointer"}} onClick={()=>setOpen(p=>!p)}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:16}}>📋</span>
+        <div style={{fontWeight:700,fontSize:13,color:hasIssues?"#92400e":"#166534"}}>
+          HR & Compliance Overview
+          {hasIssues?" — Action Items Pending":" — All Clear"}
+        </div>
+      </div>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <button style={{...S.btn("#64748b"),fontSize:11,padding:"4px 10px"}} onClick={e=>{e.stopPropagation();printHRSummary();}}>🖨️ Print HR Summary</button>
+        <span style={{fontSize:14,color:"#64748b"}}>{open?"▲":"▼"}</span>
+      </div>
+    </div>
+    {open&&<div style={{padding:"0 16px 14px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>
+      {[
+        {label:"📝 Open Drafts",val:wuData.open,color:wuData.open>0?"#d97706":"#16a34a"},
+        {label:"📬 Pending Ack",val:wuData.pending,color:wuData.pending>0?"#d97706":"#16a34a"},
+        {label:"⚠️ Warnings/PIPs",val:wuData.warnings,color:wuData.warnings>0?"#dc2626":"#16a34a"},
+        {label:"📁 Missing Docs",val:docData.missing,color:docData.missing>0?"#dc2626":"#16a34a"},
+        {label:"🔄 In Pipeline",val:pipeline12.length,color:pipeline12.length>0?"#d97706":"#16a34a"},
+      ].map(s=><div key={s.label} style={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:8,padding:"10px 12px",textAlign:"center"}}>
+        <div style={{fontSize:20,fontWeight:900,color:s.color}}>{loaded?s.val:"—"}</div>
+        <div style={{fontSize:10,color:"#64748b",marginTop:2}}>{s.label}</div>
+      </div>)}
+    </div>}
+  </div>;
+}
+
+// ── EXECUTIVE SUMMARY PANEL ────────────────────────────────────────────────────
+function ExecSummaryPanel({employees, library, onBack, goHome, printExecutiveSummary}){
+  const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const cleared = employees.filter(e=>{const {cleared}=getClearanceStatus(e,library);return cleared;});
+  const notCleared = employees.filter(e=>{const {cleared}=getClearanceStatus(e,library);return !cleared;});
+  const hoursMet = employees.filter(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return hrs>=req;});
+  const hoursBehind = employees.filter(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return hrs<req;});
+  const totalHrs = employees.reduce((a,e)=>a+calcCompletedHours(e,library),0);
+  const overdueEmps = employees.filter(e=>Object.keys(e.trainings||{}).some(id=>{const lt=library.find(t=>t.id===id)||{};return getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate,e.hire,lt.renewal_cycle)==='overdue';}));
+  const pipeline = [1,2,3,4].map(s=>({stage:s,label:['Hired','HR Docs Submitted','Provisionally Cleared','Fully Cleared'][s-1],count:employees.filter(e=>(e.pipeline_stage||1)===s).length}));
+
+  const statCard=(num,label,color,bg)=><div style={{background:bg||"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"14px 16px",textAlign:"center"}}>
+    <div style={{fontFamily:"serif",fontSize:28,fontWeight:900,color}}>{num}</div>
+    <div style={{fontSize:11,color:"#64748b",marginTop:3}}>{label}</div>
+  </div>;
+
+  return<div style={S.page}>
+    <NavBar title="📊 Executive Compliance Summary" sub={today} onBack={onBack} onHome={goHome}
+      extra={<button style={S.btn("#3b82f6")} onClick={printExecutiveSummary}>🖨️ Print Report</button>}/>
+    <div style={{padding:16,maxWidth:900,margin:"0 auto"}}>
+
+      {/* Top stats */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:10,marginBottom:20}}>
+        {statCard(`${cleared.length}/${employees.length}`,"✅ Staff Cleared",cleared.length===employees.length?"#2563eb":"#dc2626",cleared.length===employees.length?"#dbeafe":"#fee2e2")}
+        {statCard(notCleared.length,"⛔ Not Cleared",notCleared.length>0?"#dc2626":"#16a34a",notCleared.length>0?"#fee2e2":"#f0fdf4")}
+        {statCard(`${hoursMet.length}/${employees.length}`,"⏱️ Hours Met","#2563eb","#dbeafe")}
+        {statCard(hoursBehind.length,"Hours Behind",hoursBehind.length>0?"#d97706":"#16a34a",hoursBehind.length>0?"#fef9c3":"#f0fdf4")}
+        {statCard(totalHrs.toFixed(1)+"h","Total CE Hours","#2563eb","#dbeafe")}
+        {statCard(overdueEmps.length,"🚨 Overdue",overdueEmps.length>0?"#dc2626":"#16a34a",overdueEmps.length>0?"#fee2e2":"#f0fdf4")}
+      </div>
+
+      {/* Pipeline */}
+      <div style={{...S.card,marginBottom:14}}>
+        <div style={{fontWeight:700,fontSize:13,marginBottom:12}}>🔄 Hire to Clearance Pipeline</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+          {pipeline.map(p=><div key={p.stage} style={{textAlign:"center",background:"#f8fafc",borderRadius:8,padding:"12px 8px",border:"1px solid #e2e8f0"}}>
+            <div style={{fontFamily:"serif",fontSize:24,fontWeight:900,color:p.count>0?"#2563eb":"#94a3b8"}}>{p.count}</div>
+            <div style={{fontSize:10,color:"#64748b",marginTop:3}}>Stage {p.stage}<br/>{p.label}</div>
+          </div>)}
+        </div>
+      </div>
+
+      {/* Not cleared */}
+      {notCleared.length>0&&<div style={{...S.card,marginBottom:14,border:"1px solid #fca5a5"}}>
+        <div style={{fontWeight:700,fontSize:13,color:"#dc2626",marginBottom:10}}>⛔ Staff Not Cleared ({notCleared.length})</div>
+        {notCleared.map(e=>{const {missing}=getClearanceStatus(e,library);return<div key={e.id} style={{padding:"8px 10px",background:"#fef2f2",borderRadius:6,marginBottom:6}}>
+          <div style={{fontWeight:600,fontSize:13}}>{e.name} <span style={{fontSize:11,color:"#64748b",fontWeight:400}}>· {e.pos}</span></div>
+          <div style={{fontSize:11,color:"#dc2626",marginTop:2}}>Missing: {missing.map(t=>t.name).join(", ")||"—"}</div>
+        </div>;})}
+      </div>}
+      {notCleared.length===0&&<div style={{...S.card,marginBottom:14,background:"#f0fdf4",border:"1px solid #bbf7d0"}}><div style={{fontWeight:700,color:"#16a34a"}}>✅ All staff are cleared to work independently.</div></div>}
+
+      {/* Hours behind */}
+      {hoursBehind.length>0&&<div style={{...S.card,marginBottom:14,border:"1px solid #fde68a"}}>
+        <div style={{fontWeight:700,fontSize:13,color:"#d97706",marginBottom:10}}>⏱️ Hours Behind ({hoursBehind.length} staff)</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:8}}>
+          {hoursBehind.map(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return<div key={e.id} style={{background:"#fffbeb",border:"1px solid #fde68a",borderRadius:6,padding:"8px 10px"}}>
+            <div style={{fontWeight:600,fontSize:12}}>{e.name}</div>
+            <div style={{fontSize:11,color:"#d97706",marginTop:2}}>{hrs}/{req}h · {(req-hrs).toFixed(1)}h needed</div>
+            <HoursBar completed={hrs} required={req}/>
+          </div>;})}
+        </div>
+      </div>}
+
+      {/* Overdue */}
+      {overdueEmps.length>0&&<div style={{...S.card,marginBottom:14,border:"1px solid #fca5a5"}}>
+        <div style={{fontWeight:700,fontSize:13,color:"#dc2626",marginBottom:10}}>🚨 Overdue Trainings ({overdueEmps.length} staff)</div>
+        {overdueEmps.map(e=>{const ov=Object.keys(e.trainings||{}).filter(id=>{const lt=library.find(t=>t.id===id)||{};return getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate,e.hire,lt.renewal_cycle)==='overdue';}).map(id=>(library.find(t=>t.id===id)||{name:id}).name);return<div key={e.id} style={{padding:"8px 10px",background:"#fef2f2",borderRadius:6,marginBottom:6}}>
+          <div style={{fontWeight:600,fontSize:13}}>{e.name}</div>
+          <div style={{fontSize:11,color:"#dc2626",marginTop:2}}>{ov.join(" · ")}</div>
+        </div>;})}
+      </div>}
+
+    </div>
+  </div>;
+}
+
 function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
   const [view,setView]=useState("dashboard");const [selId,setSelId]=useState(null);
   const [search,setSearch]=useState("");const [fType,setFType]=useState("All");const [fStatus,setFStatus]=useState("All");
@@ -4253,6 +4360,131 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
     const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
   }
 
+  // ── EXECUTIVE COMPLIANCE SUMMARY (Leadership) ──────────────────────────────
+  function printExecutiveSummary(){
+    const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    const cleared = employees.filter(e=>{const {cleared}=getClearanceStatus(e,library);return cleared;});
+    const notCleared = employees.filter(e=>{const {cleared}=getClearanceStatus(e,library);return !cleared;});
+    const hoursMet = employees.filter(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return hrs>=req;});
+    const hoursBehind = employees.filter(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return hrs<req;});
+    const totalHrs = employees.reduce((a,e)=>a+calcCompletedHours(e,library),0);
+    const overdueEmps = employees.filter(e=>Object.keys(e.trainings||{}).some(id=>{const lt=library.find(t=>t.id===id)||{};return getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate,e.hire,lt.renewal_cycle)==='overdue';}));
+    const pipeline = [1,2,3,4].map(s=>({stage:s,label:['Hired','HR Docs Submitted','Provisionally Cleared','Fully Cleared'][s-1],count:employees.filter(e=>(e.pipeline_stage||1)===s).length}));
+    const notClearedRows = notCleared.map(e=>{const {missing}=getClearanceStatus(e,library);return`<tr><td>${e.name}</td><td>${e.pos}</td><td>${e.type}</td><td style="color:#dc2626">${missing.map(t=>t.name).join(', ')||'—'}</td></tr>`;}).join('');
+    const hoursRows = hoursBehind.map(e=>{const hrs=calcCompletedHours(e,library);const req=requiredHours(e);return`<tr><td>${e.name}</td><td>${e.pos}</td><td style="color:#dc2626;font-weight:700">${hrs}/${req}h</td><td style="color:#dc2626">${(req-hrs).toFixed(1)}h still needed</td></tr>`;}).join('');
+    const overdueRows = overdueEmps.map(e=>{const ov=Object.keys(e.trainings||{}).filter(id=>{const lt=library.find(t=>t.id===id)||{};return getStatus(e.trainings[id]?.completed,e.trainings[id]?.dueDate,e.hire,lt.renewal_cycle)==='overdue';}).map(id=>(library.find(t=>t.id===id)||{name:id}).name);return`<tr><td>${e.name}</td><td>${ov.join(', ')}</td></tr>`;}).join('');
+    const html=`<!DOCTYPE html><html><head><title>Executive Compliance Summary — ${today}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:28px;font-size:12px;color:#1e293b;}
+      h1{font-size:20px;margin:0 0 4px;color:#0d1b2a;}
+      .sub{font-size:12px;color:#64748b;margin:0 0 20px;}
+      .stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+      .stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 18px;text-align:center;min-width:90px;}
+      .stat-n{font-size:26px;font-weight:900;}
+      .stat-l{font-size:10px;color:#64748b;margin-top:2px;}
+      .green{color:#16a34a;} .red{color:#dc2626;} .blue{color:#2563eb;} .amber{color:#d97706;}
+      h2{font-size:13px;font-weight:700;color:#0d1b2a;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #e2e8f0;}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+      th{background:#1e293b;color:white;padding:6px 10px;text-align:left;font-size:11px;}
+      td{padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:11px;}
+      tr:nth-child(even) td{background:#f8fafc;}
+      .pipeline{display:flex;gap:10px;margin-bottom:16px;}
+      .pipe-box{flex:1;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;}
+      .pipe-n{font-size:22px;font-weight:900;color:#2563eb;}
+      .pipe-l{font-size:10px;color:#64748b;margin-top:2px;}
+      .good{background:#dbeafe;color:#1d4ed8;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;}
+      @media print{@page{margin:0.5in;}}
+    </style></head><body>
+    <h1>Executive Compliance Summary</h1>
+    <div class="sub">Southall Heritage Youth Home · Generated: ${today} · CONFIDENTIAL — LEADERSHIP ONLY</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n ${cleared.length===employees.length?'green':'red'}">${cleared.length}/${employees.length}</div><div class="stat-l">✅ Cleared</div></div>
+      <div class="stat"><div class="stat-n ${notCleared.length>0?'red':'green'}">${notCleared.length}</div><div class="stat-l">⛔ Not Cleared</div></div>
+      <div class="stat"><div class="stat-n blue">${hoursMet.length}/${employees.length}</div><div class="stat-l">Hours Met</div></div>
+      <div class="stat"><div class="stat-n ${hoursBehind.length>0?'amber':'green'}">${hoursBehind.length}</div><div class="stat-l">Hours Behind</div></div>
+      <div class="stat"><div class="stat-n blue">${totalHrs.toFixed(1)}h</div><div class="stat-l">Total CE Hours</div></div>
+      <div class="stat"><div class="stat-n ${overdueEmps.length>0?'red':'green'}">${overdueEmps.length}</div><div class="stat-l">🚨 Overdue</div></div>
+    </div>
+    <h2>🔄 Hire to Clearance Pipeline</h2>
+    <div class="pipeline">
+      ${pipeline.map(p=>`<div class="pipe-box"><div class="pipe-n">${p.count}</div><div class="pipe-l">Stage ${p.stage}<br/>${p.label}</div></div>`).join('')}
+    </div>
+    ${notCleared.length>0?`<h2>⛔ Staff NOT Cleared (${notCleared.length})</h2>
+    <table><thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Missing Trainings</th></tr></thead><tbody>${notClearedRows}</tbody></table>`:`<div class="good">✅ All staff are cleared to work independently.</div>`}
+    ${hoursBehind.length>0?`<h2>⏱️ Hours Behind (${hoursBehind.length})</h2>
+    <table><thead><tr><th>Name</th><th>Position</th><th>Hours</th><th>Gap</th></tr></thead><tbody>${hoursRows}</tbody></table>`:''}
+    ${overdueEmps.length>0?`<h2>🚨 Overdue Trainings (${overdueEmps.length} staff)</h2>
+    <table><thead><tr><th>Employee</th><th>Overdue Trainings</th></tr></thead><tbody>${overdueRows}</tbody></table>`:''}
+    </body></html>`;
+    const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+  }
+
+  // ── HR COMPLIANCE SUMMARY (HR Portal) ──────────────────────────────────────
+  async function printHRSummary(){
+    const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    // Load write-ups and HR docs for all employees
+    let allWus=[], allDocs=[];
+    try{
+      const wuResults = await Promise.all(employees.map(e=>getWriteUps(e.id).then(d=>d.map(w=>({...w,empName:e.name,empPos:e.pos})))));
+      allWus = wuResults.flat();
+      const docResults = await Promise.all(employees.map(e=>getHrDocuments(e.id).then(d=>d.map(doc=>({...doc,empName:e.name})))));
+      allDocs = docResults.flat();
+    }catch(e){toast(`Could not load HR data: ${e.message}`,'error');return;}
+
+    const openWus = allWus.filter(w=>w.status==='draft');
+    const deliveredWus = allWus.filter(w=>w.status==='delivered');
+    const acknowledgedWus = allWus.filter(w=>w.status==='acknowledged');
+    const writtenWarnings = allWus.filter(w=>w.tier==='Written Warning'||w.tier==='Final Warning');
+    const missingDocs = allDocs.filter(d=>!d.submitted);
+    const empsMissingDocs = [...new Set(missingDocs.map(d=>d.empName))];
+    const pipeline12 = employees.filter(e=>(e.pipeline_stage||1)<=2);
+    const cleanRecord = employees.filter(e=>!allWus.find(w=>w.employee_id===e.id));
+
+    const wuRows = allWus.map(w=>`<tr><td>${w.empName}</td><td style="color:${w.tier==='Written Warning'||w.tier==='Final Warning'?'#dc2626':'#475569'};font-weight:${w.tier==='Coaching Note'?'400':'700'}">${w.tier}</td><td>${w.category}</td><td>${w.incident_date||''}</td><td style="color:${w.status==='acknowledged'?'#16a34a':w.status==='delivered'?'#d97706':'#64748b'};font-weight:700">${w.status==='acknowledged'?'✅ Acknowledged':w.status==='delivered'?'📬 Delivered':'📝 Draft'}</td></tr>`).join('');
+    const missingDocRows = missingDocs.map(d=>`<tr><td>${d.empName}</td><td>${d.doc_name}</td><td>${d.category}</td><td style="color:#dc2626">Missing</td></tr>`).join('');
+    const pipelineRows = pipeline12.map(e=>`<tr><td>${e.name}</td><td>${e.pos}</td><td>${e.hire}</td><td style="color:#d97706;font-weight:700">Stage ${e.pipeline_stage||1} — ${['Hired','HR Docs Submitted','Provisionally Cleared','Fully Cleared'][(e.pipeline_stage||1)-1]}</td></tr>`).join('');
+
+    const html=`<!DOCTYPE html><html><head><title>HR Compliance Summary — ${today}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:28px;font-size:12px;color:#1e293b;}
+      h1{font-size:20px;margin:0 0 4px;color:#0d1b2a;}
+      .sub{font-size:12px;color:#64748b;margin:0 0 20px;}
+      .stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+      .stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 18px;text-align:center;min-width:90px;}
+      .stat-n{font-size:26px;font-weight:900;}
+      .stat-l{font-size:10px;color:#64748b;margin-top:2px;}
+      .red{color:#dc2626;} .blue{color:#2563eb;} .amber{color:#d97706;} .green{color:#16a34a;}
+      h2{font-size:13px;font-weight:700;color:#0d1b2a;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #e2e8f0;}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+      th{background:#1e293b;color:white;padding:6px 10px;text-align:left;font-size:11px;}
+      td{padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:11px;}
+      tr:nth-child(even) td{background:#f8fafc;}
+      .good{background:#dbeafe;color:#1d4ed8;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;margin-bottom:12px;}
+      .warn{background:#fef9c3;color:#92400e;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;margin-bottom:12px;}
+      @media print{@page{margin:0.5in;}}
+    </style></head><body>
+    <h1>HR & Compliance Summary</h1>
+    <div class="sub">Southall Heritage Youth Home · Generated: ${today} · CONFIDENTIAL — HR ACCESS ONLY</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n ${allWus.length>0?'amber':'green'}">${allWus.length}</div><div class="stat-l">Total Write-Ups</div></div>
+      <div class="stat"><div class="stat-n ${openWus.length>0?'amber':'green'}">${openWus.length}</div><div class="stat-l">📝 Open Drafts</div></div>
+      <div class="stat"><div class="stat-n ${deliveredWus.length>0?'amber':'green'}">${deliveredWus.length}</div><div class="stat-l">📬 Pending Ack</div></div>
+      <div class="stat"><div class="stat-n ${writtenWarnings.length>0?'red':'green'}">${writtenWarnings.length}</div><div class="stat-l">⚠️ Warnings/PIPs</div></div>
+      <div class="stat"><div class="stat-n ${missingDocs.length>0?'red':'green'}">${missingDocs.length}</div><div class="stat-l">📁 Missing Docs</div></div>
+      <div class="stat"><div class="stat-n ${pipeline12.length>0?'amber':'green'}">${pipeline12.length}</div><div class="stat-l">🔄 In Pipeline</div></div>
+    </div>
+    ${allWus.length>0?`<h2>📋 All Write-Ups (${allWus.length})</h2>
+    <table><thead><tr><th>Employee</th><th>Tier</th><th>Category</th><th>Incident Date</th><th>Status</th></tr></thead><tbody>${wuRows}</tbody></table>`:`<div class="good">✅ No write-ups on file.</div>`}
+    ${missingDocs.length>0?`<h2>📁 Missing HR Documents (${missingDocs.length} items · ${empsMissingDocs.length} employees)</h2>
+    <table><thead><tr><th>Employee</th><th>Document</th><th>Category</th><th>Status</th></tr></thead><tbody>${missingDocRows}</tbody></table>`:`<div class="good">✅ All HR documents complete.</div>`}
+    ${pipeline12.length>0?`<h2>🔄 Staff Still in Pipeline Stages 1–2 (${pipeline12.length})</h2>
+    <table><thead><tr><th>Name</th><th>Position</th><th>Hire Date</th><th>Pipeline Stage</th></tr></thead><tbody>${pipelineRows}</tbody></table>`:''}
+    <h2>✅ Clean Record — No Write-Ups (${cleanRecord.length} staff)</h2>
+    <div>${cleanRecord.map(e=>`<span style="background:#dbeafe;color:#1d4ed8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;margin:3px;display:inline-block">${e.name}</span>`).join('')||'—'}</div>
+    </body></html>`;
+    const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+  }
+
   async function printInServiceReport(){
     const year=new Date().getFullYear();
     const yearStart=new Date(year,0,1);
@@ -4328,6 +4560,7 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
 
   if(view==="guides")return<TrainingGuidesPanel library={library} employees={employees} onRefresh={onRefresh} onBack={()=>setView("dashboard")} goHome={goHome} toast={toast}/>;
   if(view==="pipeline")return<PipelinePanel employees={employees} library={library} onRefresh={onRefresh} onBack={()=>setView("dashboard")} goHome={goHome}/>;
+  if(view==="execsummary")return<ExecSummaryPanel employees={employees} library={library} onBack={()=>setView("dashboard")} goHome={goHome} printExecutiveSummary={printExecutiveSummary}/>;
   if(view==="detail"&&selId){
     const emp=employees.find(e=>e.id===selId);if(!emp){setView("dashboard");return null;}
     const{done,total,hrs,req,cleared,lockedSince}=stats(emp);
@@ -4811,7 +5044,7 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
                     <button style={{...S.btn("#ffffff"),padding:"3px 7px",fontSize:11,border:"1px solid #cbd5e1"}} onClick={()=>setModal({type:"due",trId})}>📅</button>
                     <button style={{...S.btn("#475569"),padding:"3px 7px",fontSize:11}} onClick={()=>setModal({type:"reset",trId})}>🔄</button>
                     {st==="complete"?<button style={{...S.btn("#64748b"),padding:"3px 7px",fontSize:11}} onClick={()=>handleClearTraining(emp.id,trId,false)}>Undo</button>:<button style={{...S.btn("#2563eb"),padding:"3px 7px",fontSize:11}} onClick={()=>{setMarkDate(todayStr);setModal({type:"mark",trId});}}>✓ Done</button>}
-                    DEMO_MODE?null:<button style={{...S.btn("#7f1d1d"),padding:"3px 6px",fontSize:11}} onClick={()=>setConfirm({msg:`Remove "${libTr.name}" from ${emp.name}?`,onYes:()=>{handleRemoveTraining(emp.id,trId);setConfirm(null);}})}>✕</button>
+                    <button style={{...S.btn("#7f1d1d"),padding:"3px 6px",fontSize:11}} onClick={()=>setConfirm({msg:`Remove "${libTr.name}" from ${emp.name}?`,onYes:()=>{handleRemoveTraining(emp.id,trId);setConfirm(null);}})}>✕</button>
                   </div>
                 </div>
                 <div style={{fontSize:11,color:"#64748b",marginTop:5,display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
@@ -4863,27 +5096,33 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
         }}>Add Employee</button>
       </Modal>}
 
-      <NavBar title={isHR?"SHYH HR Dashboard":"SHYH Leadership Dashboard"} sub={isHR?"HR Access":"Admin Access"} onHome={goHome}
+      <NavBar title={isHR?"SHYH HR & Compliance Portal":"SHYH Admin Dashboard"} sub={isHR?"HR & Compliance Access":"Admin Access"} onHome={goHome}
         extra={<>
           <button style={S.btn("#64748b")} onClick={onLibrary}>📚 Library</button>
           <button style={S.btn("#64748b")} onClick={()=>setView("guides")}>📋 Guides</button>
           <button style={S.btn("#64748b")} onClick={()=>setView("pipeline")}>🔄 Pipeline</button>
+          {!isHR&&<button style={S.btn("#3b82f6")} onClick={()=>setView("execsummary")}>📊 Summary</button>}
           <button style={S.btn("#334155")} onClick={()=>{const rows=employees.map(e=>`<tr><td>${e.name}</td><td>${e.pos}</td><td>${e.type}</td><td>${e.hire}</td><td style="font-family:monospace;font-weight:bold">${e.pin}</td><td>${e.email||""}</td><td>${e.phone||""}</td></tr>`).join("");const html=`<!DOCTYPE html><html><head><title>SHYH Staff Roster</title><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th{background:#1e293b;color:white;padding:8px 10px;text-align:left;font-size:12px;}td{padding:7px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;}tr:nth-child(even){background:#f8fafc;}</style></head><body><h1>SHYH Staff Roster</h1><p style="font-size:12px;color:#64748b;">Generated: ${new Date().toLocaleDateString()} · CONFIDENTIAL</p><table><thead><tr><th>Name</th><th>Position</th><th>Type</th><th>Start Date</th><th>Passcode</th><th>Email</th><th>Phone</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();}}>🖨️ Roster</button>
           <button style={{...S.btn("#64748b"),padding:"7px 12px",fontSize:12}} onClick={printInServiceReport}>🏢 In-Service</button>
-          <select style={{...S.sel,background:"#64748b",color:"#fff",fontWeight:700,cursor:"pointer"}} onChange={e=>{const v=e.target.value;if(v==="group-all")printGroupReport("all");else if(v==="group-ps")printGroupReport("preservice");else if(v==="group-annual")printGroupReport("annual");e.target.value="";}}>
+          <select style={{...S.sel,background:"#64748b",color:"#fff",fontWeight:700,cursor:"pointer"}} onChange={e=>{const v=e.target.value;if(v==="group-all")printGroupReport("all");else if(v==="group-ps")printGroupReport("preservice");else if(v==="group-annual")printGroupReport("annual");else if(v==="exec-summary")printExecutiveSummary();else if(v==="hr-summary")printHRSummary();e.target.value="";}}>
             <option value="">📊 Group Reports</option>
             <option value="group-ps">Pre-Service Report</option>
             <option value="group-annual">Annual Hours Report</option>
             <option value="group-all">Full Group Report</option>
+            <option value="exec-summary">Executive Summary</option>
+            {isHR&&<option value="hr-summary">HR Compliance Summary</option>}
           </select>
           <button style={S.btn("#475569")} onClick={()=>setModal({type:"auditor"})}>🔍 Auditor</button>           <button style={S.btn("#3b82f6")} onClick={()=>setModal({type:"addemp"})}>+ Add Staff</button>
         </>}/>
 
       <div style={{padding:16,maxWidth:1200,margin:"0 auto"}}>
-        {DEMO_MODE&&<div style={{background:"#dbeafe",border:"1px solid #93c5fd",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-          <div style={{fontSize:13,color:"#1d4ed8"}}><strong>🧭 Demo Tip:</strong> Click <strong>Marcus Webb</strong> to see overdue trainings + a Written Warning. Click <strong>Devon Castillo</strong> to see a Coaching Note. Use the <strong style={{background:"#f59e0b",color:"#1e293b",padding:"0 6px",borderRadius:4}}>?</strong> button below for more tips.</div>
+        {/* Demo hint banner — Leadership only */}
+        {DEMO_MODE&&!isHR&&<div style={{background:"#dbeafe",border:"1px solid #93c5fd",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <div style={{fontSize:13,color:"#1d4ed8"}}><strong>🧭 Demo Tip:</strong> Click <strong>Marcus Webb</strong> (overdue + Written Warning) or <strong>Devon Castillo</strong> (coaching note). Try <strong>📊 Summary</strong> in the nav for the executive view. Use <strong style={{background:"#f59e0b",color:"#1e293b",padding:"0 6px",borderRadius:4}}>?</strong> below for more tips.</div>
           <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{fontSize:12,fontWeight:700,color:"#1d4ed8",textDecoration:"none",whiteSpace:"nowrap"}}>📅 Book a Live Demo →</a>
         </div>}
+        {/* HR Summary Banner (Option A) — visible only in HR portal */}
+        {isHR&&<HRSummaryBanner employees={employees} library={library} printHRSummary={printHRSummary}/>}
         {notClearedEmps.length>0&&<div style={{background:"#dc262618",border:"1px solid #dc262644",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:18}}>⛔</span>
           <div><div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div><div style={{fontSize:12,color:"#475569"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div></div>
@@ -4948,17 +5187,11 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
   );
 }
 
-if(DEMO_MODE){
-  const style=document.createElement("style");
-  style.textContent=`@keyframes demoPulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,0.7);}70%{box-shadow:0 0 0 8px rgba(245,158,11,0);}100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}}`;
-  document.head.appendChild(style);
-}
-
 export default function App(){
   const [employees,setEmployees]=useState([]);const [library,setLibrary]=useState([]);
   const [loading,setLoading]=useState(true);const [screen,setScreen]=useState("home");
   const [isHR,setIsHR]=useState(false);
-  const [tourStep,setTourStep]=useState(-1); // -1 = tour off
+  const [tourStep,setTourStep]=useState(-1);
   const [adminView,setAdminView]=useState("dashboard");   const [auditorSession,setAuditorSession]=useState(null);const [code,setCode]=useState("");const [codeErr,setCodeErr]=useState("");
 
   async function loadAll(){
@@ -4976,9 +5209,8 @@ export default function App(){
   }
 
   if(loading)return<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🎓</div><div style={{fontSize:16,color:"#64748b"}}>Loading SHYH Training Tracker…</div></div></div>;
-  // Demo tour overlay — renders on top of any screen
-  const tourOverlay = tourStep>=0 ? <DemoTourOverlay step={tourStep} onNext={()=>setTourStep(p=>p+1)} onClose={()=>setTourStep(-1)}/> : null;
-  if(screen==="auditor"&&auditorSession)return<ErrorBoundary><><AuditorDashboard employees={employees} library={library} session={auditorSession} onSignOut={()=>{setAuditorSession(null);setScreen("home");}}/>{DEMO_MODE&&<DemoContextHelp portal='auditor'/>}</></ErrorBoundary>;   if(screen==="auditor-login")return(<AuditorLoginScreen onSuccess={(session)=>{setAuditorSession(session);setScreen("auditor");}} goHome={goHome}/>);   if(screen==="hr-login")return(<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><div style={{width:"100%",maxWidth:360}}><div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>📋</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>HR Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the HR code to continue</p></div><div style={S.card}><label style={S.lbl}>HR Code</label><input style={{...S.inp,marginBottom:10}} type="password" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryHR()} placeholder="Enter HR code"/>{codeErr&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{codeErr}</div>}<button style={S.btn("#dc2626",true)} onClick={tryHR}>Enter HR Portal</button><button style={{...S.btn("#64748b",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button></div></div></div>);   if(screen==="employee")return<ErrorBoundary><><EmpPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome}/>{DEMO_MODE&&<DemoContextHelp portal='employee'/>}</></ErrorBoundary>;
+  const tourOverlay=tourStep>=0?<DemoTourOverlay step={tourStep} onNext={()=>setTourStep(p=>p+1)} onClose={()=>setTourStep(-1)}/>:null;
+  if(screen==="auditor"&&auditorSession)return<ErrorBoundary><><AuditorDashboard employees={employees} library={library} session={auditorSession} onSignOut={()=>{setAuditorSession(null);setScreen("home");}}/>{DEMO_MODE&&<DemoContextHelp portal="auditor"/>}</></ErrorBoundary>;   if(screen==="auditor-login")return(<AuditorLoginScreen onSuccess={(session)=>{setAuditorSession(session);setScreen("auditor");}} goHome={goHome}/>);   if(screen==="hr-login")return(<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><div style={{width:"100%",maxWidth:360}}><div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>📋</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>HR Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the HR code to continue</p></div><div style={S.card}><label style={S.lbl}>HR Code</label><input style={{...S.inp,marginBottom:10}} type="password" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryHR()} placeholder="Enter HR code"/>{codeErr&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{codeErr}</div>}<button style={S.btn("#dc2626",true)} onClick={tryHR}>Enter HR Portal</button><button style={{...S.btn("#64748b",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button></div></div></div>);   if(screen==="employee")return<ErrorBoundary><><EmpPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome}/>{DEMO_MODE&&<DemoContextHelp portal="employee"/>}</></ErrorBoundary>;
   if(screen==="admin"){
     if(adminView==="library")return<ErrorBoundary><TrainingLibrary library={library} employees={employees} onRefresh={loadAll} goBack={()=>setAdminView("dashboard")} goHome={goHome}/></ErrorBoundary>;
     return<ErrorBoundary><AdminPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome} onLibrary={()=>setAdminView("library")} isHR={isHR}/></ErrorBoundary>;
@@ -4999,26 +5231,18 @@ export default function App(){
   );
   return(
     <div style={{...S.page,minHeight:"100vh"}}>
-      {/* Full-width yellow banner at very top */}
       <div style={{background:"#f59e0b",color:"#1e293b",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:16}}>🎓</span>
-          <div>
-            <span style={{fontWeight:800,fontSize:13}}>ComplianceReady — Interactive Demo</span>
-            <span style={{fontSize:12,marginLeft:10,opacity:.8}}>Sample data only · Not a real facility</span>
-          </div>
+          <div><span style={{fontWeight:800,fontSize:13}}>ComplianceReady — Interactive Demo</span><span style={{fontSize:12,marginLeft:10,opacity:.8}}>Sample data only · Not a real facility</span></div>
         </div>
         <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#1e293b",color:"#fff",padding:"6px 16px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>📅 Book a Live Demo</a>
       </div>
-
-      {/* Main content */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 48px)"}}>
         <div style={{width:"100%",maxWidth:420,textAlign:"center"}}>
           <div style={{fontSize:48,marginBottom:8}}>🎓</div>
           <h1 style={{margin:"0 0 4px",fontSize:24,fontWeight:800}}>SHYH Training Tracker</h1>
           <p style={{margin:"0 0 20px",color:"#64748b",fontSize:14}}>Stay on top of annual training requirements</p>
-
-          {/* Cheat sheet — compact, right above buttons */}
           <div style={{background:"#fefce8",border:"1px solid #fde68a",borderRadius:10,padding:"10px 14px",marginBottom:16,textAlign:"left"}}>
             <div style={{fontWeight:700,fontSize:11,color:"#92400e",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>Demo Access Codes</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 12px",fontSize:12,marginBottom:8}}>
@@ -5028,30 +5252,23 @@ export default function App(){
               ])}
             </div>
             <div style={{borderTop:"1px solid #fde68a",paddingTop:6,fontSize:11,color:"#92400e",display:"flex",gap:16,flexWrap:"wrap"}}>
-              <span>Leadership: <strong>demo2026</strong></span>
-              <span>HR Portal: <strong>hr2026</strong></span>
+              <span>Admin: <strong>demo2026</strong></span>
+              <span>HR & Compliance: <strong>hr2026</strong></span>
             </div>
           </div>
-
-          {/* Start Demo Tour */}
           <button style={{width:"100%",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#1e293b",border:"none",borderRadius:12,padding:"16px 20px",fontSize:16,fontWeight:800,cursor:"pointer",marginBottom:10,boxShadow:"0 4px 20px rgba(245,158,11,0.35)",display:"flex",alignItems:"center",justifyContent:"center",gap:10}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
             <span style={{fontSize:20}}>🚀</span>
-            <div style={{textAlign:"left"}}>
-              <div>Start Demo Tour</div>
-              <div style={{fontSize:12,fontWeight:500,opacity:.8}}>Auto-login · Guided walkthrough · No code needed</div>
-            </div>
+            <div style={{textAlign:"left"}}><div>Start Demo Tour</div><div style={{fontSize:12,fontWeight:500,opacity:.8}}>Auto-login · Guided walkthrough · No code needed</div></div>
           </button>
-
           <div style={{display:"flex",alignItems:"center",gap:8,margin:"8px 0"}}>
             <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
             <span style={{fontSize:11,color:"#94a3b8",fontWeight:600}}>OR EXPLORE ON YOUR OWN</span>
             <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
           </div>
-
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
-            <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
-            <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, employee records</div></button>
+            <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Admin Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
+            <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR & Compliance Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, corrective actions</div></button>
             <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
           </div>
           <p style={{marginTop:12,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions<br/>Demo data resets every Sunday.</p>
