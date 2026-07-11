@@ -37,6 +37,136 @@ const ADMIN_CODE = "demo2026";
 const DEMO_MODE = true;
 const CALENDLY_URL = "https://shorturl.at/2vqLa";
 const HR_CODE = "hr2026";
+
+// ── DEMO TOUR COMPONENT ────────────────────────────────────────────────────────
+const TOUR_STEPS = [
+  {
+    id: 1,
+    icon: "🛡️",
+    title: "Leadership Dashboard",
+    desc: "You're in! This is what your admin sees every day — staff clearance, overdue trainings, hours, and compliance at a glance.",
+    hint: "👇 Find Marcus Webb — he has overdue trainings and a Written Warning",
+    color: "#3b82f6",
+  },
+  {
+    id: 2,
+    icon: "👤",
+    title: "Employee Detail View",
+    desc: "Click any employee card to see their full training record, clearance status, hours, certificates, and documentation.",
+    hint: "👇 Look at the Write-Ups button — Devon has a coaching note on file",
+    color: "#3b82f6",
+  },
+  {
+    id: 3,
+    icon: "📋",
+    title: "HR Portal",
+    desc: "The HR Portal has separate access for sensitive actions — write-ups, employee files, HR docs, and corrective actions.",
+    hint: "Go back home → Enter code: hr2026",
+    color: "#dc2626",
+  },
+  {
+    id: 4,
+    icon: "🔍",
+    title: "Auditor / Licensing Access",
+    desc: "Generate a temporary read-only code for DFPS inspectors. They see training records and compliance reports — nothing else.",
+    hint: "Go back home → Auditor / Licensing Access",
+    color: "#475569",
+  },
+  {
+    id: 5,
+    icon: "👤",
+    title: "Employee Portal",
+    desc: "Staff log in with just a PIN — no username needed. They see their own trainings, hours, clearance status, and write-ups.",
+    hint: "Try PIN 8847 (Priya Nair) or 2291 (Marcus Webb)",
+    color: "#2563eb",
+  },
+];
+
+function DemoTourOverlay({step, onNext, onClose}){
+  const s = TOUR_STEPS[step];
+  if(!s) return null;
+  const isLast = step === TOUR_STEPS.length - 1;
+  return(
+    <div style={{position:"fixed",bottom:20,right:20,zIndex:9999,maxWidth:320,width:"calc(100% - 40px)"}}>
+      <div style={{background:"#1e293b",borderRadius:14,padding:18,boxShadow:"0 8px 40px rgba(0,0,0,0.4)",border:`2px solid ${s.color}44`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:20}}>{s.icon}</span>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,color:s.color,textTransform:"uppercase",letterSpacing:.5}}>Demo Tour · Step {step+1} of {TOUR_STEPS.length}</div>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff",marginTop:1}}>{s.title}</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:18,cursor:"pointer",lineHeight:1,padding:"2px 4px"}}>✕</button>
+        </div>
+        <p style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,margin:"0 0 10px"}}>{s.desc}</p>
+        <div style={{background:"rgba(255,255,255,0.06)",borderRadius:8,padding:"8px 10px",marginBottom:12,fontSize:12,color:s.color,fontWeight:600}}>{s.hint}</div>
+        <div style={{display:"flex",gap:8}}>
+          {!isLast&&<button onClick={onNext} style={{flex:1,background:s.color,color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>Next Tip →</button>}
+          {isLast&&<button onClick={onClose} style={{flex:1,background:"#3b82f6",color:"#fff",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Got It!</button>}
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.5)",border:"none",borderRadius:8,padding:"9px 14px",fontSize:12,cursor:"pointer"}}>Skip</button>
+        </div>
+        {/* Progress dots */}
+        <div style={{display:"flex",gap:4,justifyContent:"center",marginTop:10}}>
+          {TOUR_STEPS.map((_,i)=><div key={i} style={{width:i===step?16:6,height:6,borderRadius:99,background:i===step?s.color:"rgba(255,255,255,0.2)",transition:"all 0.3s"}}/>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoContextHelp({portal}){
+  const [open,setOpen]=useState(false);
+  const tips = {
+    leadership:[
+      {icon:"👀",text:"Click Marcus Webb — overdue trainings + Written Warning"},
+      {icon:"👀",text:"Click Devon Castillo — coaching note on file, almost cleared"},
+      {icon:"📊",text:"Try Group Reports to print a compliance summary"},
+      {icon:"🔄",text:"Click Pipeline to see the hire-to-clearance tracker"},
+      {icon:"🔍",text:"Try Auditor button to create a temporary inspector code"},
+      {icon:"📚",text:"Try Library to see the full training catalog"},
+    ],
+    hr:[
+      {icon:"📋",text:"Click Marcus Webb → Write-Ups to see his Written Warning"},
+      {icon:"📋",text:"Click Devon Castillo → Write-Ups to see his Coaching Note"},
+      {icon:"📁",text:"Click HR Docs on any employee to see the checklist"},
+      {icon:"📁",text:"Marcus is missing 2 HR documents — Driver License + TB Test"},
+      {icon:"➕",text:"Try creating a new Write-Up on any employee"},
+    ],
+    employee:[
+      {icon:"✅",text:"Try PIN 8847 (Priya Nair) — fully cleared, all done"},
+      {icon:"🚨",text:"Try PIN 2291 (Marcus Webb) — overdue trainings, has a write-up"},
+      {icon:"🔶",text:"Try PIN 4429 (Devon Castillo) — provisionally cleared"},
+      {icon:"📄",text:"Check the My Documents tab to see a delivered write-up"},
+      {icon:"🎓",text:"Check Certificates tab — Priya has 3 generated certs"},
+    ],
+    auditor:[
+      {icon:"👁️",text:"Click any employee to see their full training record"},
+      {icon:"🖨️",text:"Use Print Record to generate a DFPS-ready report"},
+      {icon:"✍️",text:"Use Print Ack to see signed acknowledgements"},
+      {icon:"🎓",text:"Use Certs button to view generated certificates"},
+    ],
+  };
+  const list = tips[portal]||[];
+  return(
+    <div style={{position:"fixed",bottom:20,right:20,zIndex:9000}}>
+      {open&&<div style={{background:"#1e293b",borderRadius:14,padding:16,marginBottom:10,maxWidth:280,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#f59e0b",textTransform:"uppercase",letterSpacing:.5,marginBottom:10}}>Try These in {portal.charAt(0).toUpperCase()+portal.slice(1)}</div>
+        {list.map((t,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"6px 0",borderBottom:i<list.length-1?"1px solid rgba(255,255,255,0.06)":"none"}}>
+          <span style={{fontSize:13,flexShrink:0}}>{t.icon}</span>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.75)",lineHeight:1.5}}>{t.text}</span>
+        </div>)}
+        <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"block",marginTop:12,background:"#f59e0b",color:"#1e293b",borderRadius:8,padding:"8px 0",fontSize:12,fontWeight:700,textAlign:"center",textDecoration:"none"}}>📅 Book a Live Demo</a>
+      </div>}
+      <button onClick={()=>setOpen(p=>!p)} style={{width:48,height:48,borderRadius:50,background:open?"#1e293b":"#f59e0b",color:open?"#fff":"#1e293b",border:"none",fontSize:20,fontWeight:900,cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
+        {open?"✕":"?"}
+      </button>
+    </div>
+  );
+}
+
+// ── END DEMO COMPONENTS ────────────────────────────────────────────────────────
+
 const PASS_SCORE = 70;
 const CTYPES = ["Read and Acknowledge","Read and Quiz","Link","Certificate","Webinar"];
 const ALL_TAGS = ["Pre-Service","Annual","Required for Clearance","Acknowledgement","In-Service"];
@@ -4555,7 +4685,10 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
           extra={<>
             <button style={S.btn("#64748b")} onClick={()=>setModal({type:"profile"})}>✏️ Edit</button>
             {isHR&&<button style={S.btn("#3b82f6")} onClick={()=>setModal({type:"hrDocs"})}>📄 HR Docs</button>}
-            <button style={S.btn("#dc2626")} onClick={()=>setModal({type:"writeups"})}>📋 Write-Ups</button>
+            <button style={{...S.btn("#dc2626"),position:"relative"}} onClick={()=>setModal({type:"writeups"})}>
+              📋 Write-Ups
+              {DEMO_MODE&&<span style={{position:"absolute",top:-4,right:-4,width:10,height:10,borderRadius:"50%",background:"#f59e0b",boxShadow:"0 0 0 0 rgba(245,158,11,0.7)",animation:"demoPulse 1.5s infinite"}}/>}
+            </button>
             <button style={S.btn("#475569")} onClick={()=>setModal({type:"empFiles"})}>📁 Docs</button>
             {isHR&&DEMO_MODE&&<button style={{...S.btn("#94a3b8"),fontSize:11,padding:"5px 10px",cursor:"not-allowed"}} onClick={()=>toast("Not available in demo","warn")}>
               {emp.is_active===false?"↩ Reactivate":"Archive"}
@@ -4747,6 +4880,10 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
         </>}/>
 
       <div style={{padding:16,maxWidth:1200,margin:"0 auto"}}>
+        {DEMO_MODE&&<div style={{background:"#dbeafe",border:"1px solid #93c5fd",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <div style={{fontSize:13,color:"#1d4ed8"}}><strong>🧭 Demo Tip:</strong> Click <strong>Marcus Webb</strong> to see overdue trainings + a Written Warning. Click <strong>Devon Castillo</strong> to see a Coaching Note. Use the <strong style={{background:"#f59e0b",color:"#1e293b",padding:"0 6px",borderRadius:4}}>?</strong> button below for more tips.</div>
+          <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{fontSize:12,fontWeight:700,color:"#1d4ed8",textDecoration:"none",whiteSpace:"nowrap"}}>📅 Book a Live Demo →</a>
+        </div>}
         {notClearedEmps.length>0&&<div style={{background:"#dc262618",border:"1px solid #dc262644",borderRadius:10,padding:"10px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:18}}>⛔</span>
           <div><div style={{fontWeight:700,color:"#f87171",fontSize:14}}>{notClearedEmps.length} staff NOT CLEARED to work independently</div><div style={{fontSize:12,color:"#475569"}}>{notClearedEmps.map(e=>e.name).join(", ")}</div></div>
@@ -4806,14 +4943,22 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
         </div>
         {filtered.length===0&&<div style={{textAlign:"center",color:"#64748b",marginTop:40}}>No staff match your filters.</div>}
       </div>
+      {DEMO_MODE&&<DemoContextHelp portal="leadership"/>}
     </div>
   );
+}
+
+if(DEMO_MODE){
+  const style=document.createElement("style");
+  style.textContent=`@keyframes demoPulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,0.7);}70%{box-shadow:0 0 0 8px rgba(245,158,11,0);}100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}}`;
+  document.head.appendChild(style);
 }
 
 export default function App(){
   const [employees,setEmployees]=useState([]);const [library,setLibrary]=useState([]);
   const [loading,setLoading]=useState(true);const [screen,setScreen]=useState("home");
   const [isHR,setIsHR]=useState(false);
+  const [tourStep,setTourStep]=useState(-1); // -1 = tour off
   const [adminView,setAdminView]=useState("dashboard");   const [auditorSession,setAuditorSession]=useState(null);const [code,setCode]=useState("");const [codeErr,setCodeErr]=useState("");
 
   async function loadAll(){
@@ -4831,7 +4976,9 @@ export default function App(){
   }
 
   if(loading)return<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🎓</div><div style={{fontSize:16,color:"#64748b"}}>Loading SHYH Training Tracker…</div></div></div>;
-  if(screen==="auditor"&&auditorSession)return<ErrorBoundary><AuditorDashboard employees={employees} library={library} session={auditorSession} onSignOut={()=>{setAuditorSession(null);setScreen("home");}}/></ErrorBoundary>;   if(screen==="auditor-login")return(<AuditorLoginScreen onSuccess={(session)=>{setAuditorSession(session);setScreen("auditor");}} goHome={goHome}/>);   if(screen==="hr-login")return(<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><div style={{width:"100%",maxWidth:360}}><div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>📋</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>HR Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the HR code to continue</p></div><div style={S.card}><label style={S.lbl}>HR Code</label><input style={{...S.inp,marginBottom:10}} type="password" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryHR()} placeholder="Enter HR code"/>{codeErr&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{codeErr}</div>}<button style={S.btn("#dc2626",true)} onClick={tryHR}>Enter HR Portal</button><button style={{...S.btn("#64748b",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button></div></div></div>);   if(screen==="employee")return<ErrorBoundary><EmpPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome}/></ErrorBoundary>;
+  // Demo tour overlay — renders on top of any screen
+  const tourOverlay = tourStep>=0 ? <DemoTourOverlay step={tourStep} onNext={()=>setTourStep(p=>p+1)} onClose={()=>setTourStep(-1)}/> : null;
+  if(screen==="auditor"&&auditorSession)return<ErrorBoundary><><AuditorDashboard employees={employees} library={library} session={auditorSession} onSignOut={()=>{setAuditorSession(null);setScreen("home");}}/>{DEMO_MODE&&<DemoContextHelp portal='auditor'/>}</></ErrorBoundary>;   if(screen==="auditor-login")return(<AuditorLoginScreen onSuccess={(session)=>{setAuditorSession(session);setScreen("auditor");}} goHome={goHome}/>);   if(screen==="hr-login")return(<div style={{...S.page,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><div style={{width:"100%",maxWidth:360}}><div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,marginBottom:8}}>📋</div><h1 style={{margin:"0 0 4px",fontSize:22,fontWeight:800}}>HR Access</h1><p style={{margin:0,color:"#64748b",fontSize:13}}>Enter the HR code to continue</p></div><div style={S.card}><label style={S.lbl}>HR Code</label><input style={{...S.inp,marginBottom:10}} type="password" autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryHR()} placeholder="Enter HR code"/>{codeErr&&<div style={{color:"#f87171",fontSize:13,marginBottom:10,background:"#dc262618",padding:"8px 12px",borderRadius:6}}>{codeErr}</div>}<button style={S.btn("#dc2626",true)} onClick={tryHR}>Enter HR Portal</button><button style={{...S.btn("#64748b",true),marginTop:8}} onClick={goHome}>🏠 Back to Home</button></div></div></div>);   if(screen==="employee")return<ErrorBoundary><><EmpPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome}/>{DEMO_MODE&&<DemoContextHelp portal='employee'/>}</></ErrorBoundary>;
   if(screen==="admin"){
     if(adminView==="library")return<ErrorBoundary><TrainingLibrary library={library} employees={employees} onRefresh={loadAll} goBack={()=>setAdminView("dashboard")} goHome={goHome}/></ErrorBoundary>;
     return<ErrorBoundary><AdminPortal employees={employees} library={library} onRefresh={loadAll} goHome={goHome} onLibrary={()=>setAdminView("library")} isHR={isHR}/></ErrorBoundary>;
@@ -4886,13 +5033,28 @@ export default function App(){
             </div>
           </div>
 
+          {/* Start Demo Tour */}
+          <button style={{width:"100%",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#1e293b",border:"none",borderRadius:12,padding:"16px 20px",fontSize:16,fontWeight:800,cursor:"pointer",marginBottom:10,boxShadow:"0 4px 20px rgba(245,158,11,0.35)",display:"flex",alignItems:"center",justifyContent:"center",gap:10}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
+            <span style={{fontSize:20}}>🚀</span>
+            <div style={{textAlign:"left"}}>
+              <div>Start Demo Tour</div>
+              <div style={{fontSize:12,fontWeight:500,opacity:.8}}>Auto-login · Guided walkthrough · No code needed</div>
+            </div>
+          </button>
+
+          <div style={{display:"flex",alignItems:"center",gap:8,margin:"8px 0"}}>
+            <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
+            <span style={{fontSize:11,color:"#94a3b8",fontWeight:600}}>OR EXPLORE ON YOUR OWN</span>
+            <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
+          </div>
+
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
             <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Leadership Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
             <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, employee records</div></button>
             <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
           </div>
-          <p style={{marginTop:14,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions</p>
+          <p style={{marginTop:12,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions<br/>Demo data resets every Sunday.</p>
         </div>
       </div>
     </div>
