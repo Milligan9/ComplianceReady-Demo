@@ -582,7 +582,7 @@ function TrainingTags({tags}){
 
 function Bar({val,total,h=7}){
   const pct=total?Math.round(val/total*100):0;
-  const c=pct===100?"#3b82f6":pct>60?"#64748b":"#f87171";
+  const c=pct===100?"#0e9e8e":pct>60?"#64748b":"#f87171";
   return<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,background:"#f8fafc",borderRadius:99,height:h,overflow:"hidden"}}><div style={{width:`${pct}%`,background:c,height:"100%",borderRadius:99}}/></div><span style={{fontSize:11,color:"#64748b",minWidth:36}}>{val}/{total}</span></div>;
 }
 function HoursBar({completed,required}){
@@ -5230,49 +5230,79 @@ export default function App(){
     </div>
   );
   return(
-    <div style={{...S.page,minHeight:"100vh"}}>
-      <div style={{height:4,background:"linear-gradient(90deg,#0e9e8e,#0f6e56)"}}/>
-      <div style={{background:"#f59e0b",color:"#1e293b",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:16}}>🎓</span>
-          <div><span style={{fontWeight:800,fontSize:13}}>ComplianceReady — Interactive Demo</span><span style={{fontSize:12,marginLeft:10,opacity:.8}}>Sample data only · Not a real facility</span></div>
+    <div style={{...S.page,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+      {/* Teal header band */}
+      <div style={{background:"linear-gradient(135deg,#0e9e8e,#0f6e56)",padding:"20px 24px",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
+        <div style={{position:"absolute",bottom:-30,left:-30,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,position:"relative"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:48,height:48,borderRadius:12,background:"rgba(255,255,255,0.18)"}}>
+              <span style={{fontSize:26}}>{"🎓"}</span>
+            </div>
+            <div>
+              <div style={{fontFamily:"serif",fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>ComplianceReady</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.8)",marginTop:1}}>Interactive Demo · Sample data only · Not a real facility</div>
+            </div>
+          </div>
+          <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#fff",color:"#0f6e56",padding:"8px 18px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap",boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>{"📅"} Book a Live Demo</a>
         </div>
-        <a href={CALENDLY_URL} target="_blank" rel="noreferrer" style={{display:"inline-block",background:"#1e293b",color:"#fff",padding:"6px 16px",borderRadius:99,fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>📅 Book a Live Demo</a>
       </div>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:16,minHeight:"calc(100vh - 48px)"}}>
-        <div style={{width:"100%",maxWidth:420,textAlign:"center"}}>
-          <div style={{fontSize:48,marginBottom:8}}>🎓</div>
-          <h1 style={{margin:"0 0 4px",fontSize:24,fontWeight:800}}>SHYH Training Tracker</h1>
-          <p style={{margin:"0 0 20px",color:"#64748b",fontSize:14}}>Stay on top of annual training requirements</p>
-          <div style={{background:"#fefce8",border:"1px solid #fde68a",borderRadius:10,padding:"10px 14px",marginBottom:16,textAlign:"left"}}>
-            <div style={{fontWeight:700,fontSize:11,color:"#92400e",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>Demo Access Codes</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 12px",fontSize:12,marginBottom:8}}>
-              {[["Priya Nair","8847"],["Devon Castillo","4429"],["Jordan Ellis","3312"],["Marcus Webb","2291"],["Sandra Okafor","6601"],["Amber Nguyen","7753"]].map(([name,pin])=>[
-                <span key={name+"-n"} style={{color:"#1e293b",fontWeight:600}}>{name}</span>,
-                <span key={name+"-p"} style={{color:"#d97706",fontFamily:"monospace",fontWeight:800}}>{pin}</span>
-              ])}
+      {/* Two-column main content */}
+      <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+        <div style={{width:"100%",maxWidth:820,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
+          {/* LEFT column */}
+          <div style={{flex:"1 1 320px",minWidth:260}}>
+            <div style={{textAlign:"center",marginBottom:18}}>
+              <div style={{fontSize:15,fontWeight:800,color:"#0d1b2a"}}>SHYH Training Tracker</div>
+              <div style={{fontSize:12,color:"#64748b",marginTop:2}}>Select a portal or start the guided tour</div>
             </div>
-            <div style={{borderTop:"1px solid #fde68a",paddingTop:6,fontSize:11,color:"#92400e",display:"flex",gap:16,flexWrap:"wrap"}}>
-              <span>Admin: <strong>demo2026</strong></span>
-              <span>HR & Compliance: <strong>hr2026</strong></span>
+            <button style={{width:"100%",background:"#0d1b2a",color:"#fff",border:"2px solid #0e9e8e",borderRadius:12,padding:"18px 20px",fontSize:15,fontWeight:800,cursor:"pointer",marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,0.18)",display:"flex",alignItems:"center",justifyContent:"center",gap:12}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
+              <span style={{fontSize:24}}>{"🚀"}</span>
+              <div style={{textAlign:"left"}}>
+                <div>Start Demo Tour</div>
+                <div style={{fontSize:11,fontWeight:400,color:"#0e9e8e",marginTop:2}}>Auto-login · guided walkthrough · no code needed</div>
+              </div>
+            </button>
+            <div style={{display:"flex",alignItems:"center",gap:8,margin:"4px 0 14px"}}>
+              <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
+              <span style={{fontSize:10,color:"#94a3b8",fontWeight:600,letterSpacing:.5,textTransform:"uppercase"}}>Or explore on your own</span>
+              <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <button style={{...S.btn("#3b82f6",true),padding:"13px 18px",fontSize:14,borderRadius:10}} onClick={()=>setScreen("employee")}>{"👤"} Employee Portal<div style={{fontSize:11,fontWeight:400,marginTop:2,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
+              <button style={{...S.btn("#64748b",true),padding:"13px 18px",fontSize:14,borderRadius:10}} onClick={()=>setScreen("admin-login")}>{"🛡️"} Admin Dashboard<div style={{fontSize:11,fontWeight:400,marginTop:2,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
+              <button style={{...S.btn("#dc2626",true),padding:"13px 18px",fontSize:14,borderRadius:10}} onClick={()=>setScreen("hr-login")}>{"📋"} HR &amp; Compliance Portal<div style={{fontSize:11,fontWeight:400,marginTop:2,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, corrective actions</div></button>
+              <button style={{...S.btn("#475569",true),padding:"13px 18px",fontSize:14,borderRadius:10}} onClick={()=>setScreen("auditor-login")}>{"🔍"} Auditor / Licensing Access<div style={{fontSize:11,fontWeight:400,marginTop:2,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
+            </div>
+            <p style={{marginTop:10,fontSize:10,color:"#94a3b8",textAlign:"center"}}>{"🌐"} Powered by ComplianceReady · ZeroMissAI Solutions · Demo resets Sundays</p>
+          </div>
+          {/* RIGHT column — access codes */}
+          <div style={{flex:"0 0 210px",minWidth:190}}>
+            <div style={{background:"#fefce8",border:"1px solid #fde68a",borderRadius:12,padding:"16px",position:"sticky",top:24}}>
+              <div style={{fontWeight:800,fontSize:10,color:"#92400e",marginBottom:10,textTransform:"uppercase",letterSpacing:1}}>Demo Access Codes</div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#92400e",textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Employee PINs</div>
+                {[["Priya Nair","8847"],["Devon Castillo","4429"],["Jordan Ellis","3312"],["Marcus Webb","2291"],["Sandra Okafor","6601"],["Amber Nguyen","7753"]].map(([n,pin])=>
+                  <div key={n} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 0",borderBottom:"1px solid rgba(253,230,138,0.4)"}}>
+                    <span style={{fontSize:11,color:"#1e293b",fontWeight:600}}>{n}</span>
+                    <span style={{fontSize:12,color:"#d97706",fontFamily:"monospace",fontWeight:800}}>{pin}</span>
+                  </div>
+                )}
+              </div>
+              <div style={{borderTop:"1px solid #fde68a",paddingTop:10}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#92400e",textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Portal Codes</div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                  <span style={{fontSize:10,color:"#475569"}}>Admin</span>
+                  <span style={{fontSize:11,fontFamily:"monospace",fontWeight:800,color:"#0d1b2a"}}>demo2026</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <span style={{fontSize:10,color:"#475569"}}>HR &amp; Compliance</span>
+                  <span style={{fontSize:11,fontFamily:"monospace",fontWeight:800,color:"#dc2626"}}>hr2026</span>
+                </div>
+              </div>
             </div>
           </div>
-          <button style={{width:"100%",background:"#0d1b2a",color:"#fff",border:"none",borderRadius:12,padding:"16px 20px",fontSize:16,fontWeight:800,cursor:"pointer",marginBottom:10,boxShadow:"0 4px 20px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",justifyContent:"center",gap:10}} onClick={()=>{setCode(ADMIN_CODE);setScreen("admin");setIsHR(false);setTourStep(0);}}>
-            <span style={{fontSize:20}}>🚀</span>
-            <div style={{textAlign:"left"}}><div>Start Demo Tour</div><div style={{fontSize:12,fontWeight:400,opacity:.65,marginTop:2}}>Auto-login · guided walkthrough · no code needed</div></div>
-          </button>
-          <div style={{display:"flex",alignItems:"center",gap:8,margin:"8px 0"}}>
-            <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
-            <span style={{fontSize:11,color:"#94a3b8",fontWeight:600}}>OR EXPLORE ON YOUR OWN</span>
-            <div style={{flex:1,height:1,background:"#e2e8f0"}}/>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <button style={{...S.btn("#3b82f6",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("employee")}>👤 Employee Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Trainings · Hours · Clearance · Certificates</div></button>
-            <button style={{...S.btn("#64748b",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("admin-login")}>🛡️ Admin Dashboard<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Admin access — code required</div></button>
-            <button style={{...S.btn("#dc2626",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("hr-login")}>📋 HR & Compliance Portal<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Write-ups, HR docs, corrective actions</div></button>
-            <button style={{...S.btn("#475569",true),padding:"16px 20px",fontSize:15,borderRadius:12}} onClick={()=>setScreen("auditor-login")}>🔍 Auditor / Licensing Access<div style={{fontSize:12,fontWeight:400,marginTop:3,color:"rgba(255,255,255,0.85)"}}>Temporary read-only access for inspectors</div></button>
-          </div>
-          <p style={{marginTop:12,fontSize:11,color:"#94a3b8"}}>🌐 Powered by ComplianceReady · ZeroMissAI Solutions<br/>Demo data resets every Sunday.</p>
         </div>
       </div>
     </div>
