@@ -2564,7 +2564,7 @@ function PipelineBadge({stage}){
 }
 
 // ── PIPELINE PANEL ────────────────────────────────────────────────────────────
-function PipelinePanel({employees, library, onRefresh, onBack, goHome}){
+function PipelinePanel({employees, library, onRefresh, onBack, goHome, isHR}){
   const {toast, Toasts} = useToast();
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("All");
@@ -4652,7 +4652,7 @@ function AdminPortal({employees,library,onRefresh,goHome,onLibrary,isHR}){
   }
 
   if(view==="guides")return<TrainingGuidesPanel library={library} employees={employees} onRefresh={onRefresh} onBack={()=>setView("dashboard")} goHome={goHome} toast={toast}/>;
-  if(view==="pipeline")return<PipelinePanel employees={employees} library={library} onRefresh={onRefresh} onBack={()=>setView("dashboard")} goHome={goHome}/>;
+  if(view==="pipeline")return<PipelinePanel employees={employees} library={library} onRefresh={onRefresh} onBack={()=>setView("dashboard")} goHome={goHome} isHR={isHR}/>;
   if(view==="execsummary")return<ExecSummaryPanel employees={employees} library={library} onBack={()=>setView("dashboard")} goHome={goHome} printExecutiveSummary={printExecutiveSummary}/>;
   if(view==="detail"&&selId){
     const emp=employees.find(e=>e.id===selId);if(!emp){setView("dashboard");return null;}
